@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GÖZETİM ALTINDASIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base Styles --- */
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #020202;
+            color: #b0b0b0;
+            overflow: hidden;
+            /* cursor: none; <-- This line was removed */
+        }
+
+        /* --- Overlay Effects --- */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0));
+            animation: scan 7s linear infinite;
+        }
+        .vignette { box-shadow: inset 0 0 20vw rgba(0, 0, 0, 0.9); }
+        .noise {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
+            animation: noise 0.15s steps(3) infinite;
+        }
+
+        /* --- Main Content --- */
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        
+        /* --- The Giant Eye --- */
+        #surveillance-eye {
+            width: 80vw;
+            max-width: 400px;
+            height: auto;
+            color: #ff2a2a;
+            filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5));
+            animation: pulse 5s ease-in-out infinite;
+        }
+        #pupil {
+            transition: transform 0.2s ease-out;
+        }
+        
+        .subtitle {
+            font-family: 'VT323', monospace;
+            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            color: #888;
+            margin-top: 2rem;
+            letter-spacing: 0.2rem;
+            animation: text-flicker 5s linear infinite;
+        }
+        .blinking-cursor {
+            color: #00ff41;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* --- Hidden Panels (Puzzle Sections) --- */
+        .panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 0, 0, 0.97);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            flex-direction: column;
+        }
+        .panel-content {
+            border: 1px solid #ff4747;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            color: #ff4747;
+            text-shadow: 0 0 3px #ff4747;
+        }
+        .panel-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .panel-content p, .panel-content a {
+            font-size: 1.25rem;
+            line-height: 1.7;
+        }
+        .redacted {
+            background-color: #ff4747;
+            color: #ff4747;
+            user-select: none;
+        }
+        .panel-link {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+            border: 1px solid #ff4747;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #ff4747;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .panel-link:hover {
+            background-color: #ff4747;
+            color: #020202;
+            cursor: crosshair;
+        }
+        .exit-prompt {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 1rem;
+            color: #888;
+            animation: text-flicker 7s linear infinite;
+        }
+
+        /* --- Glitch Effects --- */
+        #glitch-container {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .glitch-text {
+            position: absolute;
+            color: #00ff41;
+            font-size: 1.5rem;
+            opacity: 0;
+            text-shadow: 0 0 5px #00ff41;
+            white-space: nowrap;
+        }
+
+        /* --- Animations --- */
+        @keyframes scan { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
+        @keyframes noise { 0%, 100% { background-position: 0 0; } 10% { background-position: -5% -10%; } 20% { background-position: -15% 5%; } 30% { background-position: 7% -25%; } 40% { background-position: 20% 25%; } 50% { background-position: -25% 10%; } 60% { background-position: 15% 5%; } 70% { background-position: 0% 15%; } 80% { background-position: 25% 35%; } 90% { background-position: -10% 10%; } }
+        @keyframes text-flicker { 0% { opacity: 0.8; } 2% { opacity: 1; } 8% { opacity: 0.5; } 9% { opacity: 1; } 12% { opacity: 0.9; } 20% { opacity: 1; } 25% { opacity: 0.6; } 30% { opacity: 1; } 70% { opacity: 1; } 72% { opacity: 0.7; } 77% { opacity: 1; } 100% { opacity: 1; } }
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); }
+            50% { transform: scale(1.02); filter: drop-shadow(0 0 15px #ff2a2a) drop-shadow(0 0 40px rgba(255, 42, 42, 0.7)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay noise"></div>
+    <div class="overlay scanline"></div>
+    <div class="overlay vignette"></div>
+    <div id="glitch-container"></div>
+
+    <main id="main-content" class="content">
+        <svg id="surveillance-eye" viewBox="0 0 24 24" fill="currentColor">
+            <g id="pupil">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-4.41 0-8-2.69-9.72-6.5C3.96 7.61 7.59 5 12 5s8.04 2.61 9.72 6.5C20 14.81 16.41 17.5 12 17.5zm0-10.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
+            </g>
+        </svg>
+
+        <div class="subtitle">
+            <span>> </span><span id="typed-text"></span><span class="blinking-cursor">_</span>
+        </div>
+    </main>
+    
+    <!-- Hidden Info Panel -->
+    <div id="info-panel" class="panel hidden">
+        <div class="panel-content">
+            <h2>[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
+            <p>
+                PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması.
+                MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur.
+                YER: <span class="redacted">████████████ Tiyatrosu</span>.
+                TARİH: <span class="redacted">HER GÜN</span>.
+                SAAT: <span class="redacted">20:00</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.
+            </p>
+            <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+        </div>
+    </div>
+
+    <!-- Hidden Ticket Panel -->
+    <div id="ticket-panel" class="panel hidden">
+        <div class="panel-content">
+            <h2>[ ERİŞİM İZNİ_217 ]</h2>
+            <p>
+                Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir.
+                İzinsiz varlıklar tespit edilecek ve arındırılacaktır.
+                Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.
+            </p>
+            <a href="#" class="panel-link" target="_blank">[ KAYIT BAŞVURUSU YAP ]</a>
+            <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+        </div>
+    </div>
+    
+    <audio id="ambient-sound" loop src="https://cdn.pixabay.com/download/audio/2022/10/18/audio_174c69c471.mp3"></audio>
+    <audio id="typing-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1c287796.mp3"></audio>
+    <audio id="error-sound" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c9314f8c47.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const typedTextEl = document.getElementById('typed-text');
+            const glitchContainer = document.getElementById('glitch-container');
+            const mainContent = document.getElementById('main-content');
+            const infoPanel = document.getElementById('info-panel');
+            const ticketPanel = document.getElementById('ticket-panel');
+            const pupil = document.getElementById('pupil');
+            
+            const ambientSound = document.getElementById('ambient-sound');
+            const typingSound = document.getElementById('typing-sound');
+            const errorSound = document.getElementById('error-sound');
+
+            let userInput = '';
+            const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
+
+            function startExperience() {
+                ambientSound.volume = 0.1;
+                ambientSound.play().catch(e => {});
+                document.removeEventListener('click', startExperience);
+                document.removeEventListener('keydown', startExperience);
+            }
+            document.addEventListener('click', startExperience);
+            document.addEventListener('keydown', startExperience);
+
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 2;
+                const y = (e.clientY / window.innerHeight - 0.5) * 2;
+                const maxOffset = 1.5;
+                pupil.style.transform = `translate(${x * maxOffset}px, ${y * maxOffset}px)`;
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden')) {
+                        hideAllPanels();
+                        userInput = '';
+                        typedTextEl.textContent = userInput;
+                    }
+                    return; 
+                }
+
+                if (e.key === 'Enter') {
+                    processCommand(userInput);
+                    userInput = '';
+                } else if (e.key === 'Backspace') {
+                    userInput = userInput.slice(0, -1);
+                } else if (e.key.length === 1 && userInput.length < 20) {
+                    userInput += e.key.toUpperCase();
+                    typingSound.currentTime = 0;
+                    typingSound.play().catch(e => {});
+                }
+                typedTextEl.textContent = userInput;
+                if (Math.random() < 0.2) createGlitch();
+            });
+
+            function processCommand(command) {
+                switch (command) {
+                    case 'YARDIM':
+                        displayHelp();
+                        break;
+                    case 'BILGI':
+                        showPanel(infoPanel);
+                        break;
+                    case 'BILET':
+                    case 'IZIN':
+                        showPanel(ticketPanel);
+                        break;
+                    case 'CIKIS':
+                        hideAllPanels();
+                        break;
+                    default:
+                        if (infoPanel.classList.contains('hidden') && ticketPanel.classList.contains('hidden')) {
+                            errorSound.currentTime = 0;
+                            errorSound.play().catch(e => {});
+                            createGlitch('GEÇERSİZ KOMUT');
+                        }
+                        break;
+                }
+            }
+
+            function displayHelp() {
+                const helpText = "MEVCUT KOMUTLAR: BILGI, IZIN, CIKIS";
+                let i = 0;
+                userInput = '';
+                typedTextEl.textContent = '';
+                const interval = setInterval(() => {
+                    if(i < helpText.length) {
+                        typedTextEl.textContent += helpText[i];
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                        setTimeout(() => { typedTextEl.textContent = ''; }, 2000);
+                    }
+                }, 50);
+            }
+
+            function showPanel(panel) {
+                mainContent.classList.add('hidden');
+                infoPanel.classList.add('hidden');
+                ticketPanel.classList.add('hidden');
+                panel.classList.remove('hidden');
+            }
+
+            function hideAllPanels() {
+                mainContent.classList.remove('hidden');
+                infoPanel.classList.add('hidden');
+                ticketPanel.classList.add('hidden');
+            }
+
+            function createGlitch(text) {
+                const glitch = document.createElement('div');
+                glitch.className = 'glitch-text';
+                glitch.textContent = text || glitchPhrases[Math.floor(Math.random() * glitchPhrases.length)];
+                glitch.style.top = `${Math.random() * 100}vh`;
+                glitch.style.left = `${Math.random() * 100}vw`;
+                
+                glitchContainer.appendChild(glitch);
+
+                setTimeout(() => { glitch.style.opacity = 1; }, 50);
+                setTimeout(() => { glitch.style.opacity = 0; }, 200 + Math.random() * 300);
+                setTimeout(() => { glitchContainer.removeChild(glitch); }, 1000);
+            }
+        });
+    </script>
+
+</body>
+</html>
