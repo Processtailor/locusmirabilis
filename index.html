@@ -41,7 +41,9 @@
         .content-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            /* FIX: Use svh for small viewport height to account for mobile browser UI */
+            height: 100vh; /* Fallback */
+            height: 100svh;
         }
         .content {
             flex-grow: 1;
@@ -52,6 +54,7 @@
             text-align: center;
             padding-top: 1rem;
             cursor: pointer;
+            min-height: 0; /* Prevents flexbox overflow */
         }
         
         /* --- The Giant Eye --- */
@@ -118,6 +121,7 @@
             flex-direction: column;
             width: 100%;
             cursor: pointer;
+            min-height: 0; /* Prevents flexbox overflow */
         }
         .panel-content {
             border: 1px solid #ff4747;
@@ -126,6 +130,7 @@
             max-width: 800px;
             color: #ff4747;
             text-shadow: 0 0 3px #ff4747;
+            overflow-y: auto; /* Allow scrolling within panel if needed */
         }
         .panel-content h2 { font-size: 2rem; margin-bottom: 1rem; text-align: center; }
         .panel-content p, .panel-content a { font-size: 1.25rem; line-height: 1.7; }
@@ -144,6 +149,17 @@
         @keyframes text-flicker { 0% { opacity: 0.8; } 2% { opacity: 1; } 8% { opacity: 0.5; } 9% { opacity: 1; } 12% { opacity: 0.9; } 20% { opacity: 1; } 25% { opacity: 0.6; } 30% { opacity: 1; } 70% { opacity: 1; } 72% { opacity: 0.7; } 77% { opacity: 1; } 100% { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0; } }
         @keyframes pulse { 0% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); } 50% { transform: scale(1.02); filter: drop-shadow(0 0 15px #ff2a2a) drop-shadow(0 0 40px rgba(255, 42, 42, 0.7)); } 100% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); } }
+    
+        /* FIX: Media query for short screens (landscape mobile) */
+        @media (max-height: 600px) {
+            #surveillance-eye {
+                max-width: 150px;
+            }
+            .key {
+                font-size: 1rem;
+                padding: 0.4rem 0.6rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -199,9 +215,9 @@
         </div>
     </div>
     
-    <audio id="ambient-sound" loop src="https://cdn.pixabay.com/download/audio/2022/10/18/audio_174c69c471.mp3"></audio>
-    <audio id="typing-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1c287796.mp3"></audio>
-    <audio id="error-sound" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c9314f8c47.mp3"></audio>
+    <audio id="ambient-sound" loop preload="auto" src="https://freesound.org/data/previews/516/516377_10734399-lq.mp3"></audio>
+    <audio id="typing-sound" preload="auto" src="https://freesound.org/data/previews/254/254323_4243528-lq.mp3"></audio>
+    <audio id="error-sound" preload="auto" src="https://freesound.org/data/previews/142/142608_1843196-lq.mp3"></audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -218,11 +234,20 @@
             const errorSound = document.getElementById('error-sound');
 
             let userInput = '';
+            let audioUnlocked = false;
             const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
 
             function startExperience() {
-                ambientSound.volume = 0.1;
-                ambientSound.play().catch(e => {});
+                if (audioUnlocked) return;
+                
+                ambientSound.play().then(() => {
+                    ambientSound.volume = 0.1;
+                }).catch(e => console.error("Ambient sound failed:", e));
+
+                typingSound.play().then(() => typingSound.pause()).catch(e => {});
+                errorSound.play().then(() => errorSound.pause()).catch(e => {});
+
+                audioUnlocked = true;
                 document.removeEventListener('click', startExperience);
                 document.removeEventListener('keydown', startExperience);
             }
@@ -237,8 +262,10 @@
                     userInput = userInput.slice(0, -1);
                 } else if (userInput.length < 20) {
                     userInput += key;
-                    typingSound.currentTime = 0;
-                    typingSound.play().catch(e => {});
+                    if (audioUnlocked) {
+                        typingSound.currentTime = 0;
+                        typingSound.play().catch(e => console.error("Typing sound failed:", e));
+                    }
                 }
                 typedTextEl.textContent = userInput;
                 if (Math.random() < 0.2) createGlitch();
@@ -252,7 +279,6 @@
                 }
             }
 
-            // Physical keyboard listener
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     triggerEscape();
@@ -263,7 +289,6 @@
                 else if (e.key.length === 1) handleInput(e.key.toUpperCase());
             });
 
-            // Custom keyboard listener
             keyboard.addEventListener('click', (e) => {
                 if (e.target.matches('.key')) {
                     const key = e.target.dataset.key || e.target.textContent;
@@ -279,7 +304,6 @@
                 keyboard.classList.add('visible');
             });
             
-            // FIX: Add click listeners to panels to show keyboard
             infoPanel.addEventListener('click', () => {
                 keyboard.classList.add('visible');
             });
@@ -302,8 +326,10 @@
                     case 'CIKIS': hideAllPanels(); break;
                     default:
                         if (infoPanel.classList.contains('hidden') && ticketPanel.classList.contains('hidden')) {
-                            errorSound.currentTime = 0;
-                            errorSound.play().catch(e => {});
+                             if (audioUnlocked) {
+                                errorSound.currentTime = 0;
+                                errorSound.play().catch(e => console.error("Error sound failed:", e));
+                            }
                             createGlitch('GEÇERSİZ KOMUT');
                         }
                         break;
@@ -328,13 +354,13 @@
 
             function showPanel(panel) {
                 mainContent.classList.add('hidden');
-                keyboard.classList.remove('visible'); // Hide keyboard before transition
+                keyboard.classList.remove('visible');
                 panel.classList.remove('hidden');
             }
 
             function hideAllPanels() {
                 mainContent.classList.remove('hidden');
-                keyboard.classList.remove('visible'); // Hide keyboard on return
+                keyboard.classList.remove('visible');
                 infoPanel.classList.add('hidden');
                 ticketPanel.classList.add('hidden');
             }
