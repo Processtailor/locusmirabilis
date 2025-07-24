@@ -33,7 +33,7 @@
         }
         .vignette { box-shadow: inset 0 0 20vw rgba(0, 0, 0, 0.9); }
         .noise {
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
             animation: noise 0.15s steps(3) infinite;
         }
 
@@ -51,6 +51,7 @@
             align-items: center;
             text-align: center;
             padding-top: 1rem;
+            cursor: pointer;
         }
         
         /* --- The Giant Eye --- */
@@ -80,25 +81,21 @@
 
         /* --- Custom Keyboard --- */
         #keyboard {
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
             z-index: 50;
             flex-shrink: 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            opacity: 0;
         }
-        .keyboard-row {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
+        #keyboard.visible {
+            transform: translateY(0);
+            opacity: 1;
         }
         .key {
             font-family: 'VT323', monospace;
             background: rgba(0, 255, 65, 0.05);
             border: 1px solid rgba(0, 255, 65, 0.2);
             color: rgba(0, 255, 65, 0.7);
-            padding: 0.5rem 0.75rem;
-            font-size: 1.25rem;
             border-radius: 4px;
             text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
             transition: background 0.1s, color 0.1s;
@@ -113,19 +110,18 @@
 
         /* --- Hidden Panels (Puzzle Sections) --- */
         .panel {
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 0, 0, 0.97);
-            z-index: 200;
+            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            padding: 1rem;
             flex-direction: column;
+            width: 100%;
+            cursor: pointer;
         }
         .panel-content {
             border: 1px solid #ff4747;
-            padding: 2rem;
+            padding: 1rem 2rem;
             width: 100%;
             max-width: 800px;
             color: #ff4747;
@@ -164,43 +160,42 @@
                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-4.41 0-8-2.69-9.72-6.5C3.96 7.61 7.59 5 12 5s8.04 2.61 9.72 6.5C20 14.81 16.41 17.5 12 17.5zm0-10.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
                 </g>
             </svg>
-
             <div class="subtitle">
                 <span>> </span><span id="typed-text"></span><span class="blinking-cursor">_</span>
             </div>
         </main>
 
-        <div id="keyboard">
-            <div class="keyboard-row">
-                <button class="key">E</button> <button class="key">R</button> <button class="key">T</button> <button class="key">Y</button> <button class="key">U</button> <button class="key">I</button> <button class="key">O</button> <button class="key">P</button> <button class="key">Ğ</button> <button class="key">Ü</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key">A</button> <button class="key">S</button> <button class="key">D</button> <button class="key">F</button> <button class="key">G</button> <button class="key">H</button> <button class="key">J</button> <button class="key">K</button> <button class="key">L</button> <button class="key">Ş</button> <button class="key">İ</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key">Z</button> <button class="key">C</button> <button class="key">V</button> <button class="key">B</button> <button class="key">N</button> <button class="key">M</button> <button class="key">Ö</button> <button class="key">Ç</button>
-            </div>
-            <div class="keyboard-row">
-                 <button class="key special" data-key="SİL">SİL</button>
-                 <button class="key special" data-key="GİR">GİR</button>
+        <div id="info-panel" class="panel hidden">
+            <div class="panel-content">
+                <h2>[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
+                <p>PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted">████████████ Tiyatrosu</span>. TARİH: <span class="redacted">HER GÜN</span>. SAAT: <span class="redacted">20:00</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
+                <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
         </div>
-    </div>
-    
-    <!-- Hidden Panels -->
-    <div id="info-panel" class="panel hidden">
-        <div class="panel-content">
-            <h2>[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
-            <p>PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted">████████████ Tiyatrosu</span>. TARİH: <span class="redacted">HER GÜN</span>. SAAT: <span class="redacted">20:00</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
-            <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+        <div id="ticket-panel" class="panel hidden">
+            <div class="panel-content">
+                <h2>[ ERİŞİM İZNİ_217 ]</h2>
+                <p>Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
+                <a href="#" class="panel-link" target="_blank">[ KAYIT BAŞVURUSU YAP ]</a>
+                <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+            </div>
         </div>
-    </div>
-    <div id="ticket-panel" class="panel hidden">
-        <div class="panel-content">
-            <h2>[ ERİŞİM İZNİ_217 ]</h2>
-            <p>Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
-            <a href="#" class="panel-link" target="_blank">[ KAYIT BAŞVURUSU YAP ]</a>
-            <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+
+        <div id="keyboard" class="p-1 md:p-2 flex flex-col gap-1 md:gap-2">
+            <div class="flex justify-center gap-1 md:gap-2">
+                <button class="key p-2 text-lg md:p-3 md:text-xl">E</button> <button class="key p-2 text-lg md:p-3 md:text-xl">R</button> <button class="key p-2 text-lg md:p-3 md:text-xl">T</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Y</button> <button class="key p-2 text-lg md:p-3 md:text-xl">U</button> <button class="key p-2 text-lg md:p-3 md:text-xl">I</button> <button class="key p-2 text-lg md:p-3 md:text-xl">O</button> <button class="key p-2 text-lg md:p-3 md:text-xl">P</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ğ</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ü</button>
+            </div>
+            <div class="flex justify-center gap-1 md:gap-2">
+                <button class="key p-2 text-lg md:p-3 md:text-xl">A</button> <button class="key p-2 text-lg md:p-3 md:text-xl">S</button> <button class="key p-2 text-lg md:p-3 md:text-xl">D</button> <button class="key p-2 text-lg md:p-3 md:text-xl">F</button> <button class="key p-2 text-lg md:p-3 md:text-xl">G</button> <button class="key p-2 text-lg md:p-3 md:text-xl">H</button> <button class="key p-2 text-lg md:p-3 md:text-xl">J</button> <button class="key p-2 text-lg md:p-3 md:text-xl">K</button> <button class="key p-2 text-lg md:p-3 md:text-xl">L</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ş</button> <button class="key p-2 text-lg md:p-3 md:text-xl">İ</button>
+            </div>
+            <div class="flex justify-center gap-1 md:gap-2">
+                <button class="key p-2 text-lg md:p-3 md:text-xl">Z</button> <button class="key p-2 text-lg md:p-3 md:text-xl">C</button> <button class="key p-2 text-lg md:p-3 md:text-xl">V</button> <button class="key p-2 text-lg md:p-3 md:text-xl">B</button> <button class="key p-2 text-lg md:p-3 md:text-xl">N</button> <button class="key p-2 text-lg md:p-3 md:text-xl">M</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ö</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ç</button>
+            </div>
+            <div class="flex justify-center gap-1 md:gap-2">
+                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="ESC">ESC</button>
+                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="SİL">SİL</button>
+                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="GİR">GİR</button>
+            </div>
         </div>
     </div>
     
@@ -249,14 +244,18 @@
                 if (Math.random() < 0.2) createGlitch();
             }
 
+            function triggerEscape() {
+                if (!infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden')) {
+                    hideAllPanels();
+                    userInput = '';
+                    typedTextEl.textContent = userInput;
+                }
+            }
+
             // Physical keyboard listener
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    if (!infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden')) {
-                        hideAllPanels();
-                        userInput = '';
-                        typedTextEl.textContent = userInput;
-                    }
+                    triggerEscape();
                     return; 
                 }
                 if (e.key === 'Enter') handleInput('GİR');
@@ -268,8 +267,24 @@
             keyboard.addEventListener('click', (e) => {
                 if (e.target.matches('.key')) {
                     const key = e.target.dataset.key || e.target.textContent;
+                    if (key === 'ESC') {
+                        triggerEscape();
+                        return;
+                    }
                     handleInput(key);
                 }
+            });
+            
+            mainContent.addEventListener('click', () => {
+                keyboard.classList.add('visible');
+            });
+            
+            // FIX: Add click listeners to panels to show keyboard
+            infoPanel.addEventListener('click', () => {
+                keyboard.classList.add('visible');
+            });
+            ticketPanel.addEventListener('click', () => {
+                keyboard.classList.add('visible');
             });
 
             document.addEventListener('mousemove', (e) => {
@@ -312,14 +327,14 @@
             }
 
             function showPanel(panel) {
-                mainContent.parentElement.classList.add('hidden');
-                infoPanel.classList.add('hidden');
-                ticketPanel.classList.add('hidden');
+                mainContent.classList.add('hidden');
+                keyboard.classList.remove('visible'); // Hide keyboard before transition
                 panel.classList.remove('hidden');
             }
 
             function hideAllPanels() {
-                mainContent.parentElement.classList.remove('hidden');
+                mainContent.classList.remove('hidden');
+                keyboard.classList.remove('visible'); // Hide keyboard on return
                 infoPanel.classList.add('hidden');
                 ticketPanel.classList.add('hidden');
             }
