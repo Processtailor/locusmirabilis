@@ -192,7 +192,7 @@
             <div class="panel-content">
                 <h2>[ ERİŞİM İZNİ_217 ]</h2>
                 <p>Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
-                <a href="#" class="panel-link" target="_blank">[ KAYIT BAŞVURUSU YAP ]</a>
+                <a href="mailto:katilim@locusmirabilis.example?subject=Locus%20Mirabilis%20Kayit" class="panel-link" target="_blank" rel="noopener noreferrer">[ KAYIT BAŞVURUSU YAP ]</a>
                 <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
         </div>
@@ -237,6 +237,18 @@
             let audioUnlocked = false;
             const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
 
+            function normalizeCommand(value) {
+                return value
+                    .trim()
+                    .toLocaleUpperCase('tr-TR')
+                    .replace(/İ/g, 'I')
+                    .replace(/Ş/g, 'S')
+                    .replace(/Ğ/g, 'G')
+                    .replace(/Ü/g, 'U')
+                    .replace(/Ö/g, 'O')
+                    .replace(/Ç/g, 'C');
+            }
+
             function startExperience() {
                 if (audioUnlocked) return;
                 
@@ -256,7 +268,9 @@
 
             function handleInput(key) {
                 if (key === 'GİR') {
-                    processCommand(userInput);
+                    if (userInput.trim()) {
+                        processCommand(userInput);
+                    }
                     userInput = '';
                 } else if (key === 'SİL') {
                     userInput = userInput.slice(0, -1);
@@ -319,11 +333,22 @@
             });
 
             function processCommand(command) {
-                switch (command) {
-                    case 'YARDIM': displayHelp(); break;
-                    case 'BILGI': showPanel(infoPanel); break;
-                    case 'BILET': case 'IZIN': showPanel(ticketPanel); break;
-                    case 'CIKIS': hideAllPanels(); break;
+                const normalizedCommand = normalizeCommand(command);
+
+                switch (normalizedCommand) {
+                    case 'YARDIM':
+                        displayHelp();
+                        break;
+                    case 'BILGI':
+                        showPanel(infoPanel);
+                        break;
+                    case 'BILET':
+                    case 'IZIN':
+                        showPanel(ticketPanel);
+                        break;
+                    case 'CIKIS':
+                        hideAllPanels();
+                        break;
                     default:
                         if (infoPanel.classList.contains('hidden') && ticketPanel.classList.contains('hidden')) {
                              if (audioUnlocked) {
@@ -337,7 +362,7 @@
             }
 
             function displayHelp() {
-                const helpText = "MEVCUT KOMUTLAR: BILGI, IZIN, CIKIS";
+                const helpText = "MEVCUT KOMUTLAR: BILGI, BILET, IZIN, CIKIS";
                 let i = 0;
                 userInput = '';
                 typedTextEl.textContent = '';
@@ -376,7 +401,7 @@
 
                 setTimeout(() => { glitch.style.opacity = 1; }, 50);
                 setTimeout(() => { glitch.style.opacity = 0; }, 200 + Math.random() * 300);
-                setTimeout(() => { glitchContainer.removeChild(glitch); }, 1000);
+                setTimeout(() => { if (glitch.parentNode === glitchContainer) glitchContainer.removeChild(glitch); }, 1000);
             }
         });
     </script>
