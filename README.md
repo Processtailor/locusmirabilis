@@ -95,10 +95,10 @@ This section documents issues found during review and their status.
 ## 5) Phase Plan
 
 ## Phase 1 — Stabilization (Completed)
-- Core UI/keyboard flow working.
-- Command parser normalization added.
-- Help and panel flows aligned.
-- Basic bug fixes for reliability.
+- [x] Core UI/keyboard flow working.
+- [x] Command parser normalization added.
+- [x] Help and panel flows aligned.
+- [x] Basic bug fixes for reliability.
 
 ## Phase 2 — UX & Accessibility (Recommended next)
 - Add visible command hint permanently on screen.
@@ -138,4 +138,3 @@ If you modify commands:
 2. Update the `YARDIM` text.
 3. Verify keyboard + physical keyboard both still work.
 4. Re-test panel open/close flow and `ESC` behavior.
-
