@@ -235,6 +235,8 @@
 
             let userInput = '';
             let audioUnlocked = false;
+            const MAX_COMMAND_LENGTH = 20;
+            const HELP_COMMANDS = ['YARDIM', 'BILGI', 'BILET', 'IZIN', 'CIKIS'];
             const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
 
             function normalizeCommand(value) {
@@ -247,6 +249,18 @@
                     .replace(/Ü/g, 'U')
                     .replace(/Ö/g, 'O')
                     .replace(/Ç/g, 'C');
+            }
+
+            function safePlay(audioEl, startFromZero = false) {
+                if (!audioUnlocked || !audioEl) return;
+                if (startFromZero) {
+                    audioEl.currentTime = 0;
+                }
+                audioEl.play().catch(() => {});
+            }
+
+            function isVisiblePanelOpen() {
+                return !infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden');
             }
 
             function startExperience() {
@@ -274,12 +288,9 @@
                     userInput = '';
                 } else if (key === 'SİL') {
                     userInput = userInput.slice(0, -1);
-                } else if (userInput.length < 20) {
-                    userInput += key;
-                    if (audioUnlocked) {
-                        typingSound.currentTime = 0;
-                        typingSound.play().catch(e => console.error("Typing sound failed:", e));
-                    }
+                } else if (/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(key) && userInput.length < MAX_COMMAND_LENGTH) {
+                    userInput += key.toLocaleUpperCase('tr-TR');
+                    safePlay(typingSound, true);
                 }
                 typedTextEl.textContent = userInput;
                 if (Math.random() < 0.2) createGlitch();
@@ -300,7 +311,7 @@
                 }
                 if (e.key === 'Enter') handleInput('GİR');
                 else if (e.key === 'Backspace') handleInput('SİL');
-                else if (e.key.length === 1) handleInput(e.key.toUpperCase());
+                else if (e.key.length === 1) handleInput(e.key);
             });
 
             keyboard.addEventListener('click', (e) => {
@@ -350,11 +361,8 @@
                         hideAllPanels();
                         break;
                     default:
-                        if (infoPanel.classList.contains('hidden') && ticketPanel.classList.contains('hidden')) {
-                             if (audioUnlocked) {
-                                errorSound.currentTime = 0;
-                                errorSound.play().catch(e => console.error("Error sound failed:", e));
-                            }
+                        if (!isVisiblePanelOpen()) {
+                            safePlay(errorSound, true);
                             createGlitch('GEÇERSİZ KOMUT');
                         }
                         break;
@@ -362,7 +370,7 @@
             }
 
             function displayHelp() {
-                const helpText = "MEVCUT KOMUTLAR: BILGI, BILET, IZIN, CIKIS";
+                const helpText = `MEVCUT KOMUTLAR: ${HELP_COMMANDS.join(', ')}`;
                 let i = 0;
                 userInput = '';
                 typedTextEl.textContent = '';
