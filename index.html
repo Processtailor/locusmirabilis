@@ -100,6 +100,32 @@
             color: #00ff41;
         }
 
+        .top-controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 60;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .history-panel {
+            margin-top: 1rem;
+            width: min(90vw, 450px);
+            border: 1px solid rgba(0, 255, 65, 0.25);
+            background: rgba(0, 255, 65, 0.04);
+            padding: 0.5rem 0.75rem;
+            color: #00ff41;
+            font-size: 1rem;
+            text-align: left;
+        }
+
+        .history-panel ul {
+            list-style: none;
+            margin: 0.3rem 0 0;
+            padding: 0;
+        }
+
         .control-button {
             border: 1px solid rgba(0, 255, 65, 0.35);
             background: rgba(0, 255, 65, 0.08);
@@ -209,6 +235,9 @@
     <div class="overlay scanline"></div>
     <div class="overlay vignette"></div>
     <div id="glitch-container"></div>
+    <div class="top-controls" role="group" aria-label="Global controls">
+        <button id="language-toggle" class="control-button" type="button">DİL: TR</button>
+    </div>
 
     <div class="content-wrapper">
         <main id="main-content" class="content" tabindex="0" aria-label="Ana terminal ekranı">
@@ -226,6 +255,10 @@
                 <label for="volume-control">SES</label>
                 <input id="volume-control" class="volume-slider" type="range" min="0" max="100" value="10" aria-label="Ses seviyesi">
             </div>
+            <div class="history-panel" aria-live="polite">
+                <strong id="history-title">SON KOMUTLAR</strong>
+                <ul id="history-list"></ul>
+            </div>
         </main>
 
         <div id="info-panel" class="panel hidden" tabindex="0" aria-label="Bilgi paneli">
@@ -238,8 +271,19 @@
         <div id="ticket-panel" class="panel hidden" tabindex="0" aria-label="Erişim izni paneli">
             <div class="panel-content">
                 <h2>[ ERİŞİM İZNİ_217 ]</h2>
-                <p>Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
-                <a href="mailto:katilim@locusmirabilis.example?subject=Locus%20Mirabilis%20Kayit" class="panel-link" target="_blank" rel="noopener noreferrer">[ KAYIT BAŞVURUSU YAP ]</a>
+                <p id="ticket-description">Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
+                <form id="registration-form" class="mt-6 space-y-3" novalidate>
+                    <label class="block">
+                        <span id="reg-name-label">KOD ADI</span>
+                        <input id="reg-name" class="w-full p-2 bg-black/30 border border-red-400" type="text" required maxlength="32" autocomplete="off">
+                    </label>
+                    <label class="block">
+                        <span id="reg-contact-label">İLETİŞİM KANALI</span>
+                        <input id="reg-contact" class="w-full p-2 bg-black/30 border border-red-400" type="email" required maxlength="80" autocomplete="off">
+                    </label>
+                    <button class="panel-link mt-0" type="submit" id="registration-submit">[ KAYDI TAMAMLA ]</button>
+                    <p id="registration-status" class="text-center min-h-[2rem]"></p>
+                </form>
                 <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
         </div>
@@ -278,6 +322,16 @@
             const keyboardKeys = keyboard.querySelectorAll('.key');
             const muteToggle = document.getElementById('mute-toggle');
             const volumeControl = document.getElementById('volume-control');
+            const languageToggle = document.getElementById('language-toggle');
+            const commandHintEl = document.querySelector('.command-hint');
+            const historyTitle = document.getElementById('history-title');
+            const historyList = document.getElementById('history-list');
+            const registrationForm = document.getElementById('registration-form');
+            const registrationStatus = document.getElementById('registration-status');
+            const regNameLabel = document.getElementById('reg-name-label');
+            const regContactLabel = document.getElementById('reg-contact-label');
+            const registrationSubmit = document.getElementById('registration-submit');
+            const ticketDescription = document.getElementById('ticket-description');
             
             const ambientSound = document.getElementById('ambient-sound');
             const typingSound = document.getElementById('typing-sound');
@@ -287,12 +341,45 @@
             let audioUnlocked = false;
             let isMuted = false;
             let masterVolume = Number(volumeControl.value) / 100;
+            let language = 'TR';
+            let lastOpenedPanel = 'main';
+            let commandHistory = [];
+            let puzzleState = { dossierSeen: false, clueUnlocked: false, branch: 'none' };
             const MAX_COMMAND_LENGTH = 20;
             const HELP_COMMANDS = ['YARDIM', 'BILGI', 'BILET', 'IZIN', 'CIKIS'];
             const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
+            const SESSION_KEY = 'locusMirabilisSession';
+            const i18n = {
+                TR: {
+                    languageButton: 'DİL: TR',
+                    hint: 'KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS',
+                    historyTitle: 'SON KOMUTLAR',
+                    emptyHistory: 'Henüz komut girilmedi.',
+                    ticketDescription: "Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.",
+                    regName: 'KOD ADI',
+                    regContact: 'İLETİŞİM KANALI',
+                    regSubmit: '[ KAYDI TAMAMLA ]',
+                    regSuccess: 'Kayıt alındı. Sistem sizi izliyor.',
+                    regError: 'Geçerli ad ve iletişim kanalı girin.',
+                    helpPrefix: 'MEVCUT KOMUTLAR:'
+                },
+                EN: {
+                    languageButton: 'LANG: EN',
+                    hint: 'COMMAND HINT: HELP, INFO, TICKET, ACCESS, EXIT',
+                    historyTitle: 'RECENT COMMANDS',
+                    emptyHistory: 'No commands yet.',
+                    ticketDescription: 'Citizen participation is essential for regime continuity. Your registration proves your loyalty to the system. Unauthorized entities will be detected and purified. By confirming participation, you accept the rules and reality of Locus Mirabilis.',
+                    regName: 'CODE NAME',
+                    regContact: 'CONTACT CHANNEL',
+                    regSubmit: '[ COMPLETE REGISTRATION ]',
+                    regSuccess: 'Registration captured. The system is watching you.',
+                    regError: 'Provide a valid name and contact channel.',
+                    helpPrefix: 'AVAILABLE COMMANDS:'
+                }
+            };
 
             function normalizeCommand(value) {
-                return value
+                const base = value
                     .trim()
                     .toLocaleUpperCase('tr-TR')
                     .replace(/İ/g, 'I')
@@ -301,6 +388,16 @@
                     .replace(/Ü/g, 'U')
                     .replace(/Ö/g, 'O')
                     .replace(/Ç/g, 'C');
+
+                const aliases = {
+                    HELP: 'YARDIM',
+                    INFO: 'BILGI',
+                    TICKET: 'BILET',
+                    ACCESS: 'IZIN',
+                    EXIT: 'CIKIS',
+                    TRACE: 'IZ'
+                };
+                return aliases[base] || base;
             }
 
             function safePlay(audioEl, startFromZero = false) {
@@ -309,6 +406,73 @@
                     audioEl.currentTime = 0;
                 }
                 audioEl.play().catch(() => {});
+            }
+
+            function getLocaleText(key) {
+                return i18n[language][key];
+            }
+
+            function saveSessionState() {
+                const payload = {
+                    language,
+                    lastOpenedPanel,
+                    commandHistory,
+                    puzzleState
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+            }
+
+            function loadSessionState() {
+                try {
+                    const raw = localStorage.getItem(SESSION_KEY);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    language = parsed.language === 'EN' ? 'EN' : 'TR';
+                    lastOpenedPanel = parsed.lastOpenedPanel || 'main';
+                    commandHistory = Array.isArray(parsed.commandHistory) ? parsed.commandHistory.slice(0, 6) : [];
+                    puzzleState = {
+                        dossierSeen: Boolean(parsed.puzzleState?.dossierSeen),
+                        clueUnlocked: Boolean(parsed.puzzleState?.clueUnlocked),
+                        branch: ['none', 'trust', 'resist'].includes(parsed.puzzleState?.branch) ? parsed.puzzleState.branch : 'none'
+                    };
+                } catch {
+                    localStorage.removeItem(SESSION_KEY);
+                }
+            }
+
+            function renderHistory() {
+                historyList.innerHTML = '';
+                if (!commandHistory.length) {
+                    const li = document.createElement('li');
+                    li.textContent = getLocaleText('emptyHistory');
+                    historyList.appendChild(li);
+                    return;
+                }
+                commandHistory.slice().reverse().forEach((command) => {
+                    const li = document.createElement('li');
+                    li.textContent = `> ${command}`;
+                    historyList.appendChild(li);
+                });
+            }
+
+            function renderLanguage() {
+                languageToggle.textContent = getLocaleText('languageButton');
+                commandHintEl.textContent = getLocaleText('hint');
+                historyTitle.textContent = getLocaleText('historyTitle');
+                ticketDescription.textContent = getLocaleText('ticketDescription');
+                regNameLabel.textContent = getLocaleText('regName');
+                regContactLabel.textContent = getLocaleText('regContact');
+                registrationSubmit.textContent = getLocaleText('regSubmit');
+                registrationStatus.textContent = '';
+                renderHistory();
+            }
+
+            function pushCommandToHistory(command) {
+                commandHistory.push(command);
+                if (commandHistory.length > 6) {
+                    commandHistory.shift();
+                }
+                renderHistory();
             }
 
             function isVisiblePanelOpen() {
@@ -360,9 +524,17 @@
             }
             document.addEventListener('click', startExperience);
             document.addEventListener('keydown', startExperience);
+            loadSessionState();
             setKeyboardVisibility(false);
             applyAudioSettings();
             updateMuteButtonText();
+            renderLanguage();
+
+            if (lastOpenedPanel === 'info') {
+                showPanel(infoPanel);
+            } else if (lastOpenedPanel === 'ticket') {
+                showPanel(ticketPanel);
+            }
 
             function handleInput(key) {
                 if (key === 'GİR') {
@@ -426,6 +598,29 @@
                 applyAudioSettings();
             });
 
+            languageToggle.addEventListener('click', () => {
+                language = language === 'TR' ? 'EN' : 'TR';
+                renderLanguage();
+                saveSessionState();
+            });
+
+            registrationForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const nameField = document.getElementById('reg-name');
+                const contactField = document.getElementById('reg-contact');
+                const nameValue = nameField.value.trim();
+                const contactValue = contactField.value.trim();
+                if (!nameValue || !contactField.checkValidity()) {
+                    registrationStatus.textContent = getLocaleText('regError');
+                    safePlay(errorSound, true);
+                    return;
+                }
+                registrationStatus.textContent = getLocaleText('regSuccess');
+                createGlitch(language === 'TR' ? `KAYIT: ${nameValue}` : `REGISTERED: ${nameValue}`);
+                nameField.value = '';
+                contactField.value = '';
+            });
+
             volumeControl.addEventListener('input', (event) => {
                 masterVolume = Number(event.target.value) / 100;
                 applyAudioSettings();
@@ -440,17 +635,37 @@
 
             function processCommand(command) {
                 const normalizedCommand = normalizeCommand(command);
+                pushCommandToHistory(normalizedCommand);
 
                 switch (normalizedCommand) {
                     case 'YARDIM':
                         displayHelp();
                         break;
                     case 'BILGI':
+                        puzzleState.dossierSeen = true;
                         showPanel(infoPanel);
                         break;
                     case 'BILET':
                     case 'IZIN':
                         showPanel(ticketPanel);
+                        break;
+                    case 'IZ':
+                        if (puzzleState.dossierSeen) {
+                            puzzleState.clueUnlocked = true;
+                            createGlitch(language === 'TR' ? 'İPUCU: TRUST veya RESIST' : 'CLUE: TRUST or RESIST');
+                        }
+                        break;
+                    case 'TRUST':
+                        if (puzzleState.clueUnlocked) {
+                            puzzleState.branch = 'trust';
+                            createGlitch(language === 'TR' ? 'SİSTEM SENİ ONAYLADI' : 'SYSTEM APPROVES YOU');
+                        }
+                        break;
+                    case 'RESIST':
+                        if (puzzleState.clueUnlocked) {
+                            puzzleState.branch = 'resist';
+                            createGlitch(language === 'TR' ? 'DİRENİŞ KAYDEDİLDİ' : 'RESISTANCE REGISTERED');
+                        }
                         break;
                     case 'CIKIS':
                         hideAllPanels();
@@ -462,10 +677,14 @@
                         }
                         break;
                 }
+                saveSessionState();
             }
 
             function displayHelp() {
-                const helpText = `MEVCUT KOMUTLAR: ${HELP_COMMANDS.join(', ')}`;
+                const commandSet = language === 'TR'
+                    ? HELP_COMMANDS.join(', ') + ', IZ'
+                    : 'HELP, INFO, TICKET, ACCESS, EXIT, TRACE';
+                const helpText = `${getLocaleText('helpPrefix')} ${commandSet}`;
                 let i = 0;
                 userInput = '';
                 typedTextEl.textContent = '';
@@ -485,6 +704,8 @@
                 setKeyboardVisibility(false);
                 panel.classList.remove('hidden');
                 panel.focus();
+                lastOpenedPanel = panel === infoPanel ? 'info' : 'ticket';
+                saveSessionState();
             }
 
             function hideAllPanels() {
@@ -493,6 +714,8 @@
                 infoPanel.classList.add('hidden');
                 ticketPanel.classList.add('hidden');
                 mainContent.focus();
+                lastOpenedPanel = 'main';
+                saveSessionState();
             }
 
             function createGlitch(text) {
