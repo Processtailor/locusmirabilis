@@ -100,10 +100,10 @@ This section documents issues found during review and their status.
 - [x] Help and panel flows aligned.
 - [x] Basic bug fixes for reliability.
 
-## Phase 2 — UX & Accessibility (Recommended next)
-- Add visible command hint permanently on screen.
-- Improve keyboard accessibility (`aria-label`, focus states, tab order).
-- Add optional mute/unmute and volume control.
+## Phase 2 — UX & Accessibility (Implemented)
+- [x] Add visible command hint permanently on screen.
+- [x] Improve keyboard accessibility (`aria-label`, focus states, tab order).
+- [x] Add optional mute/unmute and volume control.
 
 ## Phase 3 — Content & Feature Expansion
 - Replace placeholder `mailto:` with real ticket/registration workflow.

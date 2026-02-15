@@ -82,6 +82,47 @@
             animation: blink 1s step-end infinite;
         }
 
+        .command-hint {
+            margin-top: 1rem;
+            font-size: clamp(0.9rem, 2.4vw, 1.1rem);
+            color: #00ff41;
+            letter-spacing: 0.1rem;
+            opacity: 0.8;
+        }
+
+        .audio-controls {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            color: #00ff41;
+        }
+
+        .control-button {
+            border: 1px solid rgba(0, 255, 65, 0.35);
+            background: rgba(0, 255, 65, 0.08);
+            color: #00ff41;
+            padding: 0.35rem 0.7rem;
+            border-radius: 4px;
+        }
+
+        .volume-slider {
+            accent-color: #00ff41;
+            width: 120px;
+        }
+
+        .key:focus-visible,
+        .panel-link:focus-visible,
+        .control-button:focus-visible,
+        .volume-slider:focus-visible,
+        #main-content:focus-visible,
+        .panel:focus-visible {
+            outline: 2px solid #00ff41;
+            outline-offset: 2px;
+        }
+
         /* --- Custom Keyboard --- */
         #keyboard {
             z-index: 50;
@@ -170,7 +211,7 @@
     <div id="glitch-container"></div>
 
     <div class="content-wrapper">
-        <main id="main-content" class="content">
+        <main id="main-content" class="content" tabindex="0" aria-label="Ana terminal ekranı">
             <svg id="surveillance-eye" viewBox="0 0 24 24" fill="currentColor">
                 <g id="pupil">
                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-4.41 0-8-2.69-9.72-6.5C3.96 7.61 7.59 5 12 5s8.04 2.61 9.72 6.5C20 14.81 16.41 17.5 12 17.5zm0-10.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
@@ -179,16 +220,22 @@
             <div class="subtitle">
                 <span>> </span><span id="typed-text"></span><span class="blinking-cursor">_</span>
             </div>
+            <p class="command-hint" aria-live="polite">KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS</p>
+            <div class="audio-controls" role="group" aria-label="Ses kontrolleri">
+                <button id="mute-toggle" class="control-button" type="button" aria-pressed="false">SESSİZ: KAPALI</button>
+                <label for="volume-control">SES</label>
+                <input id="volume-control" class="volume-slider" type="range" min="0" max="100" value="10" aria-label="Ses seviyesi">
+            </div>
         </main>
 
-        <div id="info-panel" class="panel hidden">
+        <div id="info-panel" class="panel hidden" tabindex="0" aria-label="Bilgi paneli">
             <div class="panel-content">
                 <h2>[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
                 <p>PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted">████████████ Tiyatrosu</span>. TARİH: <span class="redacted">HER GÜN</span>. SAAT: <span class="redacted">20:00</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
                 <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
         </div>
-        <div id="ticket-panel" class="panel hidden">
+        <div id="ticket-panel" class="panel hidden" tabindex="0" aria-label="Erişim izni paneli">
             <div class="panel-content">
                 <h2>[ ERİŞİM İZNİ_217 ]</h2>
                 <p>Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
@@ -197,7 +244,7 @@
             </div>
         </div>
 
-        <div id="keyboard" class="p-1 md:p-2 flex flex-col gap-1 md:gap-2">
+        <div id="keyboard" class="p-1 md:p-2 flex flex-col gap-1 md:gap-2" role="group" aria-label="Ekran klavyesi" aria-hidden="true">
             <div class="flex justify-center gap-1 md:gap-2">
                 <button class="key p-2 text-lg md:p-3 md:text-xl">E</button> <button class="key p-2 text-lg md:p-3 md:text-xl">R</button> <button class="key p-2 text-lg md:p-3 md:text-xl">T</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Y</button> <button class="key p-2 text-lg md:p-3 md:text-xl">U</button> <button class="key p-2 text-lg md:p-3 md:text-xl">I</button> <button class="key p-2 text-lg md:p-3 md:text-xl">O</button> <button class="key p-2 text-lg md:p-3 md:text-xl">P</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ğ</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ü</button>
             </div>
@@ -228,6 +275,9 @@
             const ticketPanel = document.getElementById('ticket-panel');
             const pupil = document.getElementById('pupil');
             const keyboard = document.getElementById('keyboard');
+            const keyboardKeys = keyboard.querySelectorAll('.key');
+            const muteToggle = document.getElementById('mute-toggle');
+            const volumeControl = document.getElementById('volume-control');
             
             const ambientSound = document.getElementById('ambient-sound');
             const typingSound = document.getElementById('typing-sound');
@@ -235,6 +285,8 @@
 
             let userInput = '';
             let audioUnlocked = false;
+            let isMuted = false;
+            let masterVolume = Number(volumeControl.value) / 100;
             const MAX_COMMAND_LENGTH = 20;
             const HELP_COMMANDS = ['YARDIM', 'BILGI', 'BILET', 'IZIN', 'CIKIS'];
             const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
@@ -263,11 +315,40 @@
                 return !infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden');
             }
 
+            function applyAudioSettings() {
+                const effectVolume = Math.min(1, masterVolume * 2.5);
+                [ambientSound, typingSound, errorSound].forEach((audioEl) => {
+                    audioEl.muted = isMuted;
+                });
+                ambientSound.volume = masterVolume;
+                typingSound.volume = effectVolume;
+                errorSound.volume = effectVolume;
+            }
+
+            function updateMuteButtonText() {
+                muteToggle.textContent = `SESSİZ: ${isMuted ? 'AÇIK' : 'KAPALI'}`;
+                muteToggle.setAttribute('aria-pressed', String(isMuted));
+            }
+
+            function setKeyboardVisibility(isVisible) {
+                keyboard.classList.toggle('visible', isVisible);
+                keyboard.setAttribute('aria-hidden', String(!isVisible));
+                keyboardKeys.forEach((keyEl) => {
+                    keyEl.tabIndex = isVisible ? 0 : -1;
+                    keyEl.setAttribute('type', 'button');
+                    if (!keyEl.hasAttribute('aria-label')) {
+                        const keyText = (keyEl.dataset.key || keyEl.textContent || '').trim();
+                        const labels = { ESC: 'Çıkış', 'SİL': 'Sil', 'GİR': 'Komutu çalıştır' };
+                        keyEl.setAttribute('aria-label', labels[keyText] || `${keyText} tuşu`);
+                    }
+                });
+            }
+
             function startExperience() {
                 if (audioUnlocked) return;
                 
                 ambientSound.play().then(() => {
-                    ambientSound.volume = 0.1;
+                    applyAudioSettings();
                 }).catch(e => console.error("Ambient sound failed:", e));
 
                 typingSound.play().then(() => typingSound.pause()).catch(e => {});
@@ -279,6 +360,9 @@
             }
             document.addEventListener('click', startExperience);
             document.addEventListener('keydown', startExperience);
+            setKeyboardVisibility(false);
+            applyAudioSettings();
+            updateMuteButtonText();
 
             function handleInput(key) {
                 if (key === 'GİR') {
@@ -326,14 +410,25 @@
             });
             
             mainContent.addEventListener('click', () => {
-                keyboard.classList.add('visible');
+                setKeyboardVisibility(true);
             });
             
             infoPanel.addEventListener('click', () => {
-                keyboard.classList.add('visible');
+                setKeyboardVisibility(true);
             });
             ticketPanel.addEventListener('click', () => {
-                keyboard.classList.add('visible');
+                setKeyboardVisibility(true);
+            });
+
+            muteToggle.addEventListener('click', () => {
+                isMuted = !isMuted;
+                updateMuteButtonText();
+                applyAudioSettings();
+            });
+
+            volumeControl.addEventListener('input', (event) => {
+                masterVolume = Number(event.target.value) / 100;
+                applyAudioSettings();
             });
 
             document.addEventListener('mousemove', (e) => {
@@ -387,15 +482,17 @@
 
             function showPanel(panel) {
                 mainContent.classList.add('hidden');
-                keyboard.classList.remove('visible');
+                setKeyboardVisibility(false);
                 panel.classList.remove('hidden');
+                panel.focus();
             }
 
             function hideAllPanels() {
                 mainContent.classList.remove('hidden');
-                keyboard.classList.remove('visible');
+                setKeyboardVisibility(false);
                 infoPanel.classList.add('hidden');
                 ticketPanel.classList.add('hidden');
+                mainContent.focus();
             }
 
             function createGlitch(text) {
