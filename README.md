@@ -103,7 +103,6 @@ This section documents issues found during review and their status.
 ## Phase 2 — UX & Accessibility (Recommended next)
 - Add visible command hint permanently on screen.
 - Improve keyboard accessibility (`aria-label`, focus states, tab order).
-- Add “reduced motion” mode for users sensitive to animation.
 - Add optional mute/unmute and volume control.
 
 ## Phase 3 — Content & Feature Expansion
