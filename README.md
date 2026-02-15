@@ -106,10 +106,10 @@ This section documents issues found during review and their status.
 - [x] Add optional mute/unmute and volume control.
 
 ## Phase 3 — Content & Feature Expansion
-- Replace placeholder `mailto:` with real ticket/registration workflow.
-- Add extra puzzle layers (multi-step commands, hidden clues, branching states).
-- Add multilingual UI toggle (TR/EN).
-- Add persistent session state (last unlocked panel, command history).
+- [x] Replace placeholder `mailto:` with real ticket/registration workflow.
+- [x] Add extra puzzle layers (multi-step commands, hidden clues, branching states).
+- [x] Add multilingual UI toggle (TR/EN).
+- [x] Add persistent session state (last unlocked panel, command history).
 
 ## Phase 4 — Engineering Hardening
 - Split `index.html` into modular assets (`styles.css`, `app.js`).
