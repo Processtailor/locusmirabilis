@@ -79,16 +79,28 @@ This section documents issues found during review and their status.
 
 4. **Placeholder registration link**
    - Problem: ticket CTA pointed to `#` (non-functional).
-   - Fix: replaced with a placeholder contact flow via `mailto:` and added safe link attributes.
+   - Fix: replaced with an in-page registration `<form>` (`#registration-form`) that validates a code name + contact channel and shows a themed, in-fiction confirmation. No data leaves the browser — nothing is transmitted or stored.
 
 5. **Potential DOM removal race in glitch cleanup**
    - Problem: delayed `removeChild` could throw if element was removed unexpectedly.
    - Fix: parent existence is checked before removal.
 
+## Hardening pass (latest update)
+A full read-only audit was run and every confirmed finding was fixed:
+
+- **Input/event handling:** the global `keydown` listener now ignores events from focused form fields (no more leaking into the hidden command buffer, no `Enter` double-submit) and from buttons being activated, and it ignores `Ctrl/Cmd/Alt` shortcuts. While a panel is open only the documented exit command (`CIKIS`) is honored, so blind typing can't silently switch panels.
+- **Help animation:** the `YARDIM` typewriter is now cancellable (tracked interval/timeout) so live typing and repeated invocations no longer corrupt the terminal line.
+- **Audio resilience:** the ambient loop is retried on later user gestures (unmute, volume, screen click) instead of dying permanently after a single failed autoplay; effect-sound warm-up is muted to avoid an audible blip.
+- **Persistence:** all `localStorage` reads *and* writes are guarded, so private mode / quota / sandboxed contexts degrade gracefully; restored command history keeps the newest entries and validates types.
+- **Internationalization:** EN mode now localizes the mute button, volume label, exit prompts, info dossier, panel headings, glitch/clue/invalid-command strings, the page `<title>`, the `<html lang>` attribute, and all ARIA labels (previously many were stuck in Turkish).
+- **Accessibility:** panels are `role="dialog"`; the registration status is a live region with per-field `aria-invalid` and focus management; the on-screen keys are keyboard-operable and no longer focusable while hidden; redacted dossier values are hidden from screen readers/copy with an `[redacted]` placeholder; the decorative eye/overlays are `aria-hidden`.
+- **Assets/robustness:** fixed the corrupt base64 of the `.noise` film-grain texture (it now renders); added a local `.hidden` fallback so hide/show keeps working if the Tailwind CDN fails; added a `Content-Security-Policy` meta restricting origins.
+
 ## Still known limitations
-- Audio and font dependencies are externally hosted (offline mode is degraded).
-- No automated tests yet (behavior verified manually).
-- Registration endpoint is still not connected to a real backend service.
+- Audio and font dependencies are externally hosted (offline mode is degraded — the page now stays fully usable, but ambience/fonts/grain need the network).
+- No automated test suite is committed yet (this round was verified with a headless browser smoke test).
+- Registration is intentionally local-only and not connected to a backend service.
+- Subresource Integrity is not applied: the Tailwind Play CDN has no fixed hash, so self-hosting (Phase 4) is the real fix.
 
 ---
 
@@ -121,7 +133,7 @@ This section documents issues found during review and their status.
 
 ## 6) Further Implementations / Improvement Backlog
 
-- **Security:** add CSP headers and Subresource Integrity where possible.
+- **Security:** a `Content-Security-Policy` meta is now in place; still pending is Subresource Integrity, which requires self-hosting the Tailwind/font/audio assets (the Play CDN has no fixed hash).
 - **Performance:** optimize effect layers for low-end mobile GPUs.
 - **Design system:** centralize colors/spacing/animation values as CSS variables.
 - **Telemetry (optional):** privacy-respecting analytics for command usage patterns.

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' https://freesound.org; connect-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com;">
     <title>GÖZETİM ALTINDASIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,8 +34,22 @@
         }
         .vignette { box-shadow: inset 0 0 20vw rgba(0, 0, 0, 0.9); }
         .noise {
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
             animation: noise 0.15s steps(3) infinite;
+        }
+
+        /* --- Fallback utilities (so core hide/show + a11y still work if the Tailwind CDN fails) --- */
+        .hidden { display: none !important; }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         /* --- Main Content --- */
@@ -151,15 +166,22 @@
 
         /* --- Custom Keyboard --- */
         #keyboard {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: 50;
-            flex-shrink: 0;
+            background: rgba(2, 2, 2, 0.85);
             transform: translateY(100%);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
             opacity: 0;
         }
         #keyboard.visible {
             transform: translateY(0);
             opacity: 1;
+        }
+        #keyboard[aria-hidden="true"] {
+            pointer-events: none;
         }
         .key {
             font-family: 'VT323', monospace;
@@ -231,17 +253,17 @@
 </head>
 <body>
 
-    <div class="overlay noise"></div>
-    <div class="overlay scanline"></div>
-    <div class="overlay vignette"></div>
-    <div id="glitch-container"></div>
-    <div class="top-controls" role="group" aria-label="Global controls">
+    <div class="overlay noise" aria-hidden="true"></div>
+    <div class="overlay scanline" aria-hidden="true"></div>
+    <div class="overlay vignette" aria-hidden="true"></div>
+    <div id="glitch-container" aria-hidden="true"></div>
+    <div id="top-controls" class="top-controls" role="group" aria-label="Genel kontroller">
         <button id="language-toggle" class="control-button" type="button">DİL: TR</button>
     </div>
 
     <div class="content-wrapper">
         <main id="main-content" class="content" tabindex="0" aria-label="Ana terminal ekranı">
-            <svg id="surveillance-eye" viewBox="0 0 24 24" fill="currentColor">
+            <svg id="surveillance-eye" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                 <g id="pupil">
                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-4.41 0-8-2.69-9.72-6.5C3.96 7.61 7.59 5 12 5s8.04 2.61 9.72 6.5C20 14.81 16.41 17.5 12 17.5zm0-10.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
                 </g>
@@ -250,9 +272,9 @@
                 <span>> </span><span id="typed-text"></span><span class="blinking-cursor">_</span>
             </div>
             <p class="command-hint" aria-live="polite">KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS</p>
-            <div class="audio-controls" role="group" aria-label="Ses kontrolleri">
+            <div id="audio-controls" class="audio-controls" role="group" aria-label="Ses kontrolleri">
                 <button id="mute-toggle" class="control-button" type="button" aria-pressed="false">SESSİZ: KAPALI</button>
-                <label for="volume-control">SES</label>
+                <label id="volume-label" for="volume-control">SES</label>
                 <input id="volume-control" class="volume-slider" type="range" min="0" max="100" value="10" aria-label="Ses seviyesi">
             </div>
             <div class="history-panel" aria-live="polite">
@@ -261,28 +283,28 @@
             </div>
         </main>
 
-        <div id="info-panel" class="panel hidden" tabindex="0" aria-label="Bilgi paneli">
+        <div id="info-panel" class="panel hidden" tabindex="0" role="dialog" aria-modal="true" aria-label="Bilgi paneli">
             <div class="panel-content">
-                <h2>[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
-                <p>PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted">████████████ Tiyatrosu</span>. TARİH: <span class="redacted">HER GÜN</span>. SAAT: <span class="redacted">20:00</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
+                <h2 id="dossier-title">[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
+                <p id="dossier-body">PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted" aria-hidden="true">████████████ Tiyatrosu</span><span class="sr-only">[gizli]</span>. TARİH: <span class="redacted" aria-hidden="true">HER GÜN</span><span class="sr-only">[gizli]</span>. SAAT: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[gizli]</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
                 <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
         </div>
-        <div id="ticket-panel" class="panel hidden" tabindex="0" aria-label="Erişim izni paneli">
+        <div id="ticket-panel" class="panel hidden" tabindex="0" role="dialog" aria-modal="true" aria-label="Erişim izni paneli">
             <div class="panel-content">
-                <h2>[ ERİŞİM İZNİ_217 ]</h2>
+                <h2 id="ticket-title">[ ERİŞİM İZNİ_217 ]</h2>
                 <p id="ticket-description">Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
                 <form id="registration-form" class="mt-6 space-y-3" novalidate>
                     <label class="block">
                         <span id="reg-name-label">KOD ADI</span>
-                        <input id="reg-name" class="w-full p-2 bg-black/30 border border-red-400" type="text" required maxlength="32" autocomplete="off">
+                        <input id="reg-name" class="w-full p-2 bg-black/30 border border-red-400" type="text" required maxlength="32" autocomplete="off" aria-describedby="registration-status">
                     </label>
                     <label class="block">
                         <span id="reg-contact-label">İLETİŞİM KANALI</span>
-                        <input id="reg-contact" class="w-full p-2 bg-black/30 border border-red-400" type="email" required maxlength="80" autocomplete="off">
+                        <input id="reg-contact" class="w-full p-2 bg-black/30 border border-red-400" type="email" required maxlength="80" autocomplete="off" aria-describedby="registration-status">
                     </label>
                     <button class="panel-link mt-0" type="submit" id="registration-submit">[ KAYDI TAMAMLA ]</button>
-                    <p id="registration-status" class="text-center min-h-[2rem]"></p>
+                    <p id="registration-status" class="text-center min-h-[2rem]" role="status" aria-live="polite"></p>
                 </form>
                 <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
             </div>
@@ -290,18 +312,18 @@
 
         <div id="keyboard" class="p-1 md:p-2 flex flex-col gap-1 md:gap-2" role="group" aria-label="Ekran klavyesi" aria-hidden="true">
             <div class="flex justify-center gap-1 md:gap-2">
-                <button class="key p-2 text-lg md:p-3 md:text-xl">E</button> <button class="key p-2 text-lg md:p-3 md:text-xl">R</button> <button class="key p-2 text-lg md:p-3 md:text-xl">T</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Y</button> <button class="key p-2 text-lg md:p-3 md:text-xl">U</button> <button class="key p-2 text-lg md:p-3 md:text-xl">I</button> <button class="key p-2 text-lg md:p-3 md:text-xl">O</button> <button class="key p-2 text-lg md:p-3 md:text-xl">P</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ğ</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ü</button>
+                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">E</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">R</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">T</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Y</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">U</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">I</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">O</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">P</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ğ</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ü</button>
             </div>
             <div class="flex justify-center gap-1 md:gap-2">
-                <button class="key p-2 text-lg md:p-3 md:text-xl">A</button> <button class="key p-2 text-lg md:p-3 md:text-xl">S</button> <button class="key p-2 text-lg md:p-3 md:text-xl">D</button> <button class="key p-2 text-lg md:p-3 md:text-xl">F</button> <button class="key p-2 text-lg md:p-3 md:text-xl">G</button> <button class="key p-2 text-lg md:p-3 md:text-xl">H</button> <button class="key p-2 text-lg md:p-3 md:text-xl">J</button> <button class="key p-2 text-lg md:p-3 md:text-xl">K</button> <button class="key p-2 text-lg md:p-3 md:text-xl">L</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ş</button> <button class="key p-2 text-lg md:p-3 md:text-xl">İ</button>
+                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">A</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">S</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">D</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">F</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">G</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">H</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">J</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">K</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">L</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ş</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">İ</button>
             </div>
             <div class="flex justify-center gap-1 md:gap-2">
-                <button class="key p-2 text-lg md:p-3 md:text-xl">Z</button> <button class="key p-2 text-lg md:p-3 md:text-xl">C</button> <button class="key p-2 text-lg md:p-3 md:text-xl">V</button> <button class="key p-2 text-lg md:p-3 md:text-xl">B</button> <button class="key p-2 text-lg md:p-3 md:text-xl">N</button> <button class="key p-2 text-lg md:p-3 md:text-xl">M</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ö</button> <button class="key p-2 text-lg md:p-3 md:text-xl">Ç</button>
+                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Z</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">C</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">V</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">B</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">N</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">M</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ö</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ç</button>
             </div>
             <div class="flex justify-center gap-1 md:gap-2">
-                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="ESC">ESC</button>
-                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="SİL">SİL</button>
-                 <button class="key special p-2 text-lg md:p-3 md:text-xl" data-key="GİR">GİR</button>
+                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="ESC">ESC</button>
+                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="SİL">SİL</button>
+                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="GİR">GİR</button>
             </div>
         </div>
     </div>
@@ -332,6 +354,12 @@
             const regContactLabel = document.getElementById('reg-contact-label');
             const registrationSubmit = document.getElementById('registration-submit');
             const ticketDescription = document.getElementById('ticket-description');
+            const dossierTitle = document.getElementById('dossier-title');
+            const dossierBody = document.getElementById('dossier-body');
+            const ticketTitle = document.getElementById('ticket-title');
+            const volumeLabel = document.getElementById('volume-label');
+            const topControls = document.getElementById('top-controls');
+            const audioControls = document.getElementById('audio-controls');
             
             const ambientSound = document.getElementById('ambient-sound');
             const typingSound = document.getElementById('typing-sound');
@@ -345,12 +373,15 @@
             let lastOpenedPanel = 'main';
             let commandHistory = [];
             let puzzleState = { dossierSeen: false, clueUnlocked: false, branch: 'none' };
+            let lastStatusKey = '';      // which registration status message is showing ('', 'regSuccess', 'regError')
+            let helpInterval = null;     // active YARDIM typewriter interval (so it can be cancelled)
+            let helpTimeout = null;      // pending help-clear timeout
             const MAX_COMMAND_LENGTH = 20;
             const HELP_COMMANDS = ['YARDIM', 'BILGI', 'BILET', 'IZIN', 'CIKIS'];
-            const glitchPhrases = ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN'];
             const SESSION_KEY = 'locusMirabilisSession';
             const i18n = {
                 TR: {
+                    pageTitle: 'GÖZETİM ALTINDASIN',
                     languageButton: 'DİL: TR',
                     hint: 'KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS',
                     historyTitle: 'SON KOMUTLAR',
@@ -361,9 +392,35 @@
                     regSubmit: '[ KAYDI TAMAMLA ]',
                     regSuccess: 'Kayıt alındı. Sistem sizi izliyor.',
                     regError: 'Geçerli ad ve iletişim kanalı girin.',
-                    helpPrefix: 'MEVCUT KOMUTLAR:'
+                    helpPrefix: 'MEVCUT KOMUTLAR:',
+                    muteLabel: 'SESSİZ',
+                    muteOn: 'AÇIK',
+                    muteOff: 'KAPALI',
+                    volumeLabel: 'SES',
+                    volumeAria: 'Ses seviyesi',
+                    invalidCommand: 'GEÇERSİZ KOMUT',
+                    clueMessage: 'İPUCU: TRUST veya RESIST',
+                    trustMessage: 'SİSTEM SENİ ONAYLADI',
+                    resistMessage: 'DİRENİŞ KAYDEDİLDİ',
+                    registeredPrefix: 'KAYIT',
+                    dossierTitle: '[ DOSYA_734 ERİŞİM SAĞLANDI ]',
+                    dossierBody: 'PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted" aria-hidden="true">████████████ Tiyatrosu</span><span class="sr-only">[gizli]</span>. TARİH: <span class="redacted" aria-hidden="true">HER GÜN</span><span class="sr-only">[gizli]</span>. SAAT: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[gizli]</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.',
+                    ticketTitle: '[ ERİŞİM İZNİ_217 ]',
+                    exitPrompt: "> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.",
+                    ariaTopControls: 'Genel kontroller',
+                    ariaMain: 'Ana terminal ekranı',
+                    ariaAudio: 'Ses kontrolleri',
+                    ariaInfoPanel: 'Bilgi paneli',
+                    ariaTicketPanel: 'Erişim izni paneli',
+                    ariaKeyboard: 'Ekran klavyesi',
+                    keyEsc: 'Çıkış',
+                    keyDelete: 'Sil',
+                    keyEnter: 'Komutu çalıştır',
+                    keySuffix: 'tuşu',
+                    glitchPhrases: ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN']
                 },
                 EN: {
+                    pageTitle: 'YOU ARE UNDER SURVEILLANCE',
                     languageButton: 'LANG: EN',
                     hint: 'COMMAND HINT: HELP, INFO, TICKET, ACCESS, EXIT',
                     historyTitle: 'RECENT COMMANDS',
@@ -374,7 +431,32 @@
                     regSubmit: '[ COMPLETE REGISTRATION ]',
                     regSuccess: 'Registration captured. The system is watching you.',
                     regError: 'Provide a valid name and contact channel.',
-                    helpPrefix: 'AVAILABLE COMMANDS:'
+                    helpPrefix: 'AVAILABLE COMMANDS:',
+                    muteLabel: 'MUTE',
+                    muteOn: 'ON',
+                    muteOff: 'OFF',
+                    volumeLabel: 'VOL',
+                    volumeAria: 'Volume level',
+                    invalidCommand: 'INVALID COMMAND',
+                    clueMessage: 'CLUE: TRUST or RESIST',
+                    trustMessage: 'SYSTEM APPROVES YOU',
+                    resistMessage: 'RESISTANCE REGISTERED',
+                    registeredPrefix: 'REGISTERED',
+                    dossierTitle: '[ FILE_734 ACCESS GRANTED ]',
+                    dossierBody: 'PROJECT: Locus Mirabilis. PURPOSE: Ensuring social conformity and stability. CURRENT STATUS: Phase 3 active. Citizen participation is mandatory. LOCATION: <span class="redacted" aria-hidden="true">████████████ Theatre</span><span class="sr-only">[redacted]</span>. DATE: <span class="redacted" aria-hidden="true">EVERY DAY</span><span class="sr-only">[redacted]</span>. TIME: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[redacted]</span>. Reality will be redefined. Do not question.',
+                    ticketTitle: '[ ACCESS PERMIT_217 ]',
+                    exitPrompt: "> Type 'EXIT' or press ESC to exit.",
+                    ariaTopControls: 'Global controls',
+                    ariaMain: 'Main terminal screen',
+                    ariaAudio: 'Audio controls',
+                    ariaInfoPanel: 'Information panel',
+                    ariaTicketPanel: 'Access permit panel',
+                    ariaKeyboard: 'On-screen keyboard',
+                    keyEsc: 'Exit',
+                    keyDelete: 'Delete',
+                    keyEnter: 'Run command',
+                    keySuffix: 'key',
+                    glitchPhrases: ['THEY HEAR YOU', 'OBEY', 'NO QUESTIONS', 'WHAT IS REAL?', 'BIG BROTHER IS WATCHING', 'THOUGHT IS A CRIME', 'TRUST THE SYSTEM', 'YOU ARE NOT ALONE']
                 }
             };
 
@@ -419,24 +501,35 @@
                     commandHistory,
                     puzzleState
                 };
-                localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+                try {
+                    localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+                } catch (e) {
+                    /* storage unavailable (private mode / quota / sandbox) — the session just won't persist */
+                }
             }
 
             function loadSessionState() {
+                let raw = null;
                 try {
-                    const raw = localStorage.getItem(SESSION_KEY);
-                    if (!raw) return;
+                    raw = localStorage.getItem(SESSION_KEY);
+                } catch (e) {
+                    return; // storage not accessible at all
+                }
+                if (!raw) return;
+                try {
                     const parsed = JSON.parse(raw);
                     language = parsed.language === 'EN' ? 'EN' : 'TR';
                     lastOpenedPanel = parsed.lastOpenedPanel || 'main';
-                    commandHistory = Array.isArray(parsed.commandHistory) ? parsed.commandHistory.slice(0, 6) : [];
+                    commandHistory = Array.isArray(parsed.commandHistory)
+                        ? parsed.commandHistory.filter((c) => typeof c === 'string').slice(-6)
+                        : [];
                     puzzleState = {
                         dossierSeen: Boolean(parsed.puzzleState?.dossierSeen),
                         clueUnlocked: Boolean(parsed.puzzleState?.clueUnlocked),
                         branch: ['none', 'trust', 'resist'].includes(parsed.puzzleState?.branch) ? parsed.puzzleState.branch : 'none'
                     };
                 } catch {
-                    localStorage.removeItem(SESSION_KEY);
+                    try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
                 }
             }
 
@@ -455,7 +548,21 @@
                 });
             }
 
+            function applyKeyLabels() {
+                const labels = {
+                    ESC: getLocaleText('keyEsc'),
+                    'SİL': getLocaleText('keyDelete'),
+                    'GİR': getLocaleText('keyEnter')
+                };
+                keyboardKeys.forEach((keyEl) => {
+                    const keyText = (keyEl.dataset.key || keyEl.textContent || '').trim();
+                    keyEl.setAttribute('aria-label', labels[keyText] || `${keyText} ${getLocaleText('keySuffix')}`);
+                });
+            }
+
             function renderLanguage() {
+                document.documentElement.lang = language === 'EN' ? 'en' : 'tr';
+                document.title = getLocaleText('pageTitle');
                 languageToggle.textContent = getLocaleText('languageButton');
                 commandHintEl.textContent = getLocaleText('hint');
                 historyTitle.textContent = getLocaleText('historyTitle');
@@ -463,7 +570,29 @@
                 regNameLabel.textContent = getLocaleText('regName');
                 regContactLabel.textContent = getLocaleText('regContact');
                 registrationSubmit.textContent = getLocaleText('regSubmit');
-                registrationStatus.textContent = '';
+                dossierTitle.textContent = getLocaleText('dossierTitle');
+                dossierBody.innerHTML = getLocaleText('dossierBody'); // author-controlled constant (redaction markup, no user input)
+                ticketTitle.textContent = getLocaleText('ticketTitle');
+                volumeLabel.textContent = getLocaleText('volumeLabel');
+
+                topControls.setAttribute('aria-label', getLocaleText('ariaTopControls'));
+                mainContent.setAttribute('aria-label', getLocaleText('ariaMain'));
+                audioControls.setAttribute('aria-label', getLocaleText('ariaAudio'));
+                volumeControl.setAttribute('aria-label', getLocaleText('volumeAria'));
+                infoPanel.setAttribute('aria-label', getLocaleText('ariaInfoPanel'));
+                ticketPanel.setAttribute('aria-label', getLocaleText('ariaTicketPanel'));
+                keyboard.setAttribute('aria-label', getLocaleText('ariaKeyboard'));
+
+                document.querySelectorAll('.exit-prompt').forEach((el) => {
+                    el.textContent = getLocaleText('exitPrompt');
+                });
+
+                applyKeyLabels();
+                updateMuteButtonText();
+
+                // Re-localize (rather than wipe) any registration status that is currently showing.
+                registrationStatus.textContent = lastStatusKey ? getLocaleText(lastStatusKey) : '';
+
                 renderHistory();
             }
 
@@ -489,8 +618,17 @@
                 errorSound.volume = effectVolume;
             }
 
+            function ensureAmbient() {
+                // Retry the ambient loop whenever the user gives us a gesture — a failed first
+                // autoplay (or a transient remote-audio error) shouldn't silence it for the session.
+                if (!audioUnlocked || isMuted) return;
+                if (ambientSound.paused) {
+                    ambientSound.play().catch(() => {});
+                }
+            }
+
             function updateMuteButtonText() {
-                muteToggle.textContent = `SESSİZ: ${isMuted ? 'AÇIK' : 'KAPALI'}`;
+                muteToggle.textContent = `${getLocaleText('muteLabel')}: ${isMuted ? getLocaleText('muteOn') : getLocaleText('muteOff')}`;
                 muteToggle.setAttribute('aria-pressed', String(isMuted));
             }
 
@@ -499,26 +637,33 @@
                 keyboard.setAttribute('aria-hidden', String(!isVisible));
                 keyboardKeys.forEach((keyEl) => {
                     keyEl.tabIndex = isVisible ? 0 : -1;
-                    keyEl.setAttribute('type', 'button');
-                    if (!keyEl.hasAttribute('aria-label')) {
-                        const keyText = (keyEl.dataset.key || keyEl.textContent || '').trim();
-                        const labels = { ESC: 'Çıkış', 'SİL': 'Sil', 'GİR': 'Komutu çalıştır' };
-                        keyEl.setAttribute('aria-label', labels[keyText] || `${keyText} tuşu`);
-                    }
                 });
+            }
+
+            function cancelHelp() {
+                if (helpInterval) { clearInterval(helpInterval); helpInterval = null; }
+                if (helpTimeout) { clearTimeout(helpTimeout); helpTimeout = null; }
             }
 
             function startExperience() {
                 if (audioUnlocked) return;
                 
-                ambientSound.play().then(() => {
-                    applyAudioSettings();
-                }).catch(e => console.error("Ambient sound failed:", e));
-
-                typingSound.play().then(() => typingSound.pause()).catch(e => {});
-                errorSound.play().then(() => errorSound.pause()).catch(e => {});
-
                 audioUnlocked = true;
+                applyAudioSettings();
+                ensureAmbient();
+
+                // Warm up the effect sounds while muted, so first real playback is instant (no audible blip here).
+                [typingSound, errorSound].forEach((audioEl) => {
+                    audioEl.muted = true;
+                    audioEl.play().then(() => {
+                        audioEl.pause();
+                        audioEl.currentTime = 0;
+                        audioEl.muted = isMuted;
+                    }).catch(() => {
+                        audioEl.muted = isMuted;
+                    });
+                });
+
                 document.removeEventListener('click', startExperience);
                 document.removeEventListener('keydown', startExperience);
             }
@@ -527,13 +672,13 @@
             loadSessionState();
             setKeyboardVisibility(false);
             applyAudioSettings();
-            updateMuteButtonText();
             renderLanguage();
 
             if (lastOpenedPanel === 'info') {
-                showPanel(infoPanel);
+                puzzleState.dossierSeen = true;
+                showPanel(infoPanel, { focus: false });
             } else if (lastOpenedPanel === 'ticket') {
-                showPanel(ticketPanel);
+                showPanel(ticketPanel, { focus: false });
             }
 
             function handleInput(key) {
@@ -543,18 +688,24 @@
                     }
                     userInput = '';
                 } else if (key === 'SİL') {
+                    cancelHelp();
                     userInput = userInput.slice(0, -1);
                 } else if (/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(key) && userInput.length < MAX_COMMAND_LENGTH) {
+                    cancelHelp();
                     userInput += key.toLocaleUpperCase('tr-TR');
                     safePlay(typingSound, true);
                 }
-                typedTextEl.textContent = userInput;
+                // Don't fight the YARDIM typewriter for the same text node; it manages its own output.
+                if (!helpInterval) {
+                    typedTextEl.textContent = userInput;
+                }
                 if (Math.random() < 0.2) createGlitch();
             }
 
             function triggerEscape() {
-                if (!infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden')) {
+                if (isVisiblePanelOpen()) {
                     hideAllPanels();
+                    cancelHelp();
                     userInput = '';
                     typedTextEl.textContent = userInput;
                 }
@@ -563,32 +714,47 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     triggerEscape();
-                    return; 
+                    return;
                 }
+                const target = e.target;
+                // Focused form fields own their own typing (no leak into the command buffer / no double-submit).
+                if (target?.matches?.('input, textarea, select') || target?.isContentEditable) {
+                    return;
+                }
+                // Enter/Space on a focused button activates it via a native click — don't also run the global handler.
+                if ((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') && target?.matches?.('button, [role="button"]')) {
+                    return;
+                }
+                // Ignore browser/OS shortcuts (Ctrl/Cmd/Alt combos).
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
                 if (e.key === 'Enter') handleInput('GİR');
                 else if (e.key === 'Backspace') handleInput('SİL');
                 else if (e.key.length === 1) handleInput(e.key);
             });
 
             keyboard.addEventListener('click', (e) => {
-                if (e.target.matches('.key')) {
-                    const key = e.target.dataset.key || e.target.textContent;
-                    if (key === 'ESC') {
-                        triggerEscape();
-                        return;
-                    }
-                    handleInput(key);
+                const keyBtn = e.target.closest('.key');
+                if (!keyBtn) return;
+                const key = (keyBtn.dataset.key || keyBtn.textContent || '').trim();
+                if (key === 'ESC') {
+                    triggerEscape();
+                    return;
                 }
+                handleInput(key);
             });
             
             mainContent.addEventListener('click', () => {
                 setKeyboardVisibility(true);
+                ensureAmbient();
             });
-            
+
             infoPanel.addEventListener('click', () => {
                 setKeyboardVisibility(true);
             });
-            ticketPanel.addEventListener('click', () => {
+            ticketPanel.addEventListener('click', (e) => {
+                // Don't pop the on-screen keyboard over the registration form fields.
+                if (e.target.closest('#registration-form')) return;
                 setKeyboardVisibility(true);
             });
 
@@ -596,6 +762,7 @@
                 isMuted = !isMuted;
                 updateMuteButtonText();
                 applyAudioSettings();
+                ensureAmbient();
             });
 
             languageToggle.addEventListener('click', () => {
@@ -604,19 +771,33 @@
                 saveSessionState();
             });
 
+            ['reg-name', 'reg-contact'].forEach((id) => {
+                document.getElementById(id).addEventListener('input', (e) => {
+                    e.target.setAttribute('aria-invalid', 'false');
+                });
+            });
+
             registrationForm.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const nameField = document.getElementById('reg-name');
                 const contactField = document.getElementById('reg-contact');
                 const nameValue = nameField.value.trim();
-                const contactValue = contactField.value.trim();
-                if (!nameValue || !contactField.checkValidity()) {
+                const nameValid = nameValue.length > 0;
+                const contactValid = contactField.checkValidity();
+
+                nameField.setAttribute('aria-invalid', String(!nameValid));
+                contactField.setAttribute('aria-invalid', String(!contactValid));
+
+                if (!nameValid || !contactValid) {
+                    lastStatusKey = 'regError';
                     registrationStatus.textContent = getLocaleText('regError');
                     safePlay(errorSound, true);
+                    (!nameValid ? nameField : contactField).focus();
                     return;
                 }
+                lastStatusKey = 'regSuccess';
                 registrationStatus.textContent = getLocaleText('regSuccess');
-                createGlitch(language === 'TR' ? `KAYIT: ${nameValue}` : `REGISTERED: ${nameValue}`);
+                createGlitch(`${getLocaleText('registeredPrefix')}: ${nameValue}`);
                 nameField.value = '';
                 contactField.value = '';
             });
@@ -624,6 +805,7 @@
             volumeControl.addEventListener('input', (event) => {
                 masterVolume = Number(event.target.value) / 100;
                 applyAudioSettings();
+                ensureAmbient();
             });
 
             document.addEventListener('mousemove', (e) => {
@@ -635,6 +817,13 @@
 
             function processCommand(command) {
                 const normalizedCommand = normalizeCommand(command);
+
+                // While a panel is open the input line is hidden; only honor the documented exit
+                // command so stray/blind typing can't silently switch panels.
+                if (isVisiblePanelOpen() && normalizedCommand !== 'CIKIS') {
+                    return;
+                }
+
                 pushCommandToHistory(normalizedCommand);
 
                 switch (normalizedCommand) {
@@ -652,35 +841,43 @@
                     case 'IZ':
                         if (puzzleState.dossierSeen) {
                             puzzleState.clueUnlocked = true;
-                            createGlitch(language === 'TR' ? 'İPUCU: TRUST veya RESIST' : 'CLUE: TRUST or RESIST');
+                            createGlitch(getLocaleText('clueMessage'));
+                        } else {
+                            safePlay(errorSound, true);
+                            createGlitch(getLocaleText('invalidCommand'));
                         }
                         break;
                     case 'TRUST':
                         if (puzzleState.clueUnlocked) {
                             puzzleState.branch = 'trust';
-                            createGlitch(language === 'TR' ? 'SİSTEM SENİ ONAYLADI' : 'SYSTEM APPROVES YOU');
+                            createGlitch(getLocaleText('trustMessage'));
+                        } else {
+                            safePlay(errorSound, true);
+                            createGlitch(getLocaleText('invalidCommand'));
                         }
                         break;
                     case 'RESIST':
                         if (puzzleState.clueUnlocked) {
                             puzzleState.branch = 'resist';
-                            createGlitch(language === 'TR' ? 'DİRENİŞ KAYDEDİLDİ' : 'RESISTANCE REGISTERED');
+                            createGlitch(getLocaleText('resistMessage'));
+                        } else {
+                            safePlay(errorSound, true);
+                            createGlitch(getLocaleText('invalidCommand'));
                         }
                         break;
                     case 'CIKIS':
                         hideAllPanels();
                         break;
                     default:
-                        if (!isVisiblePanelOpen()) {
-                            safePlay(errorSound, true);
-                            createGlitch('GEÇERSİZ KOMUT');
-                        }
+                        safePlay(errorSound, true);
+                        createGlitch(getLocaleText('invalidCommand'));
                         break;
                 }
                 saveSessionState();
             }
 
             function displayHelp() {
+                cancelHelp();
                 const commandSet = language === 'TR'
                     ? HELP_COMMANDS.join(', ') + ', IZ'
                     : 'HELP, INFO, TICKET, ACCESS, EXIT, TRACE';
@@ -688,22 +885,27 @@
                 let i = 0;
                 userInput = '';
                 typedTextEl.textContent = '';
-                const interval = setInterval(() => {
-                    if(i < helpText.length) {
+                helpInterval = setInterval(() => {
+                    if (i < helpText.length) {
                         typedTextEl.textContent += helpText[i];
                         i++;
                     } else {
-                        clearInterval(interval);
-                        setTimeout(() => { typedTextEl.textContent = ''; }, 2000);
+                        clearInterval(helpInterval);
+                        helpInterval = null;
+                        helpTimeout = setTimeout(() => { typedTextEl.textContent = ''; helpTimeout = null; }, 2000);
                     }
                 }, 50);
             }
 
-            function showPanel(panel) {
+            function showPanel(panel, { focus = true } = {}) {
+                cancelHelp();
+                userInput = '';
                 mainContent.classList.add('hidden');
                 setKeyboardVisibility(false);
+                infoPanel.classList.add('hidden');
+                ticketPanel.classList.add('hidden');
                 panel.classList.remove('hidden');
-                panel.focus();
+                if (focus) panel.focus();
                 lastOpenedPanel = panel === infoPanel ? 'info' : 'ticket';
                 saveSessionState();
             }
@@ -721,7 +923,8 @@
             function createGlitch(text) {
                 const glitch = document.createElement('div');
                 glitch.className = 'glitch-text';
-                glitch.textContent = text || glitchPhrases[Math.floor(Math.random() * glitchPhrases.length)];
+                const phrases = getLocaleText('glitchPhrases');
+                glitch.textContent = text || phrases[Math.floor(Math.random() * phrases.length)];
                 glitch.style.top = `${Math.random() * 100}vh`;
                 glitch.style.left = `${Math.random() * 100}vw`;
                 
