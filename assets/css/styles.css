@@ -310,9 +310,10 @@ a { color: inherit; }
 #surveillance-eye.blink,
 #surveillance-eye.closed { transform: scaleY(0.04); }
 #surveillance-eye.closed { transition-duration: 0.35s; }
-#pupil { transition: transform 0.25s ease-out; }
-#pupil.wander { transition-duration: 1.6s; transition-timing-function: ease-in-out; }
-#pupil.stare { transition-duration: 0.12s; }
+/* The gaze jumps whole cells (no sub-pixel sliding): a sprite, not a vector. */
+#pupil { transition: transform 0.14s steps(1, end); }
+#pupil.wander { transition-duration: 0.6s; }
+#pupil.stare { transition-duration: 0.05s; }
 #pupil-core {
   transform-box: fill-box;
   transform-origin: center;

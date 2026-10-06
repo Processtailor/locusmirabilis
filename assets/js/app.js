@@ -1003,8 +1003,11 @@
      The eye
      ------------------------------------------------------------------------ */
   const PUPIL_RANGE = 16;
+  const CELL = 5; // the eye is drawn on a 5-unit pixel grid; the gaze steps cell by cell like a sprite
   function movePupil(x, y) {
-    el.pupil.style.transform = `translate(${(x * PUPIL_RANGE).toFixed(2)}px, ${(y * PUPIL_RANGE * 0.7).toFixed(2)}px)`;
+    const dx = Math.round((x * PUPIL_RANGE) / CELL) * CELL;
+    const dy = Math.round((y * PUPIL_RANGE * 0.7) / CELL) * CELL;
+    el.pupil.style.transform = `translate(${dx}px, ${dy}px)`;
   }
 
   function onPointerMove(event) {
