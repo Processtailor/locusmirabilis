@@ -310,15 +310,13 @@ a { color: inherit; }
 #surveillance-eye.blink,
 #surveillance-eye.closed { transform: scaleY(0.04); }
 #surveillance-eye.closed { transition-duration: 0.35s; }
+#surveillance-eye { transition-timing-function: ease, steps(2, end); } /* the lid drops in raster rows, not a smooth squash */
 /* The gaze jumps whole cells (no sub-pixel sliding): a sprite, not a vector. */
 #pupil { transition: transform 0.14s steps(1, end); }
 #pupil.wander { transition-duration: 0.6s; }
 #pupil.stare { transition-duration: 0.05s; }
-#pupil-core {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 0.4s ease;
-}
+/* Suspect mood: the void dilates as a discrete raster swap (the dilated pupil is a second, whole-cell shape). */
+#pupil-core { opacity: 0; transition: opacity 0.3s steps(2, end); }
 body[data-mood='suspect'] {
   --eye-color: #ff1a1a;
   --eye-glow-a: 16px;
@@ -331,7 +329,7 @@ body[data-mood='loyal'] {
   --eye-glow-b: 18px;
   --eye-pulse: 8s;
 }
-body[data-mood='suspect'] #pupil-core { transform: scale(1.45); }
+body[data-mood='suspect'] #pupil-core { opacity: 1; }
 
 /* Prompt -------------------------------------------------------------- */
 .subtitle {
