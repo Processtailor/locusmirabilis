@@ -1,0 +1,64 @@
+# Changelog
+
+All notable changes to **Locus Mirabilis** are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
+[Semantic Versioning](https://semver.org/). Only meaningful releases are listed;
+small fixes are folded into the release they shipped with.
+
+An in-fiction version of this file is published with the site at `changelog.html`,
+and the pre-2.0 page is kept at `archive/v1/` so the two versions can be compared
+side by side.
+
+## [2.0.0] — 2026-10-06 — "Telekran"
+
+The production rework. The concept is unchanged (the eye, the command terminal,
+`DOSYA_734`, `ERİŞİM İZNİ_217`, the `IZ → TRUST / RESIST` puzzle); everything
+around it was rebuilt as a Kafkaesque, Orwellian telescreen that is never quite
+under your control.
+
+### Added
+- Boot sequence that identifies the citizen and strikes thirteen; returning visitors are recognised ("we knew you never left").
+- Persistent citizen number, visit counter, loyalty status (PENDING / CLEARED / SUSPECT) and a status-bar clock that always reads 13:xx.
+- Bureaucratic processing before a panel opens ("forwarded to Unit 4 — Unit 4 not responding — approved") and a six-step approval dance for registration, ending in a receipt that confers no rights.
+- Dossier annex (EK-A) listing what the browser can see about you — all local, nothing is transmitted — plus redactions that can only be glimpsed and a 90-second access window.
+- Hidden commands: `KIMIM`, `SAAT`, `NEDEN`, `HAYIR`, `EVET`, `ITIRAZ`, `2+2`, `1984`, `BIRADER`, `LOCUS`, `UNUT` and `101` (Room 101, after `TRUST` or `RESIST`), all with English aliases.
+- Autocorrection of near-miss commands ("we know what you meant") and escalating invalid-command responses that eventually flag the citizen as a suspect.
+- Idle intrusions (the prompt types by itself), ministry notices, a Newspeak ticker, tab-switch detection ("where were you?") and occasional horizontal-sync wobble.
+- The eye blinks, wanders when you stop moving, stares when you resist and closes for Room 101; its glow follows your loyalty.
+- Fully procedural Web Audio soundtrack and effects (drone, mains hum, keys, error, alarm, shutter) — no external audio files.
+- PWA: web manifest, icons, service worker with an offline shell, in-fiction 404 page, Open Graph image.
+- Tooling: ESLint, unit tests for TR/EN content parity, Playwright end-to-end suite (desktop and phone), GitHub Actions CI and GitHub Pages deployment with build stamping.
+- This changelog, an in-fiction changelog page and the v1 archive for comparison.
+
+### Changed
+- The single 48 KB file is split into `index.html`, `assets/css/styles.css`, `assets/js/i18n.js` (all narrative text), `assets/js/audio.js` and `assets/js/app.js`.
+- Fonts are self-hosted; the Tailwind CDN is gone; the Content-Security-Policy allows `'self'` only (no inline scripts or styles).
+- Registration form gained a form number and a mandatory "I accept reality" consent; registration is remembered and registering twice is also noted.
+- On-screen keyboard gained a number row (for `101` and `2+2`) and the Q / W / X keys; typing while a panel is open is echoed inside the panel.
+- `UNUT` / `FORGET` resets the session on request (two-step confirmation); the citizen number and visit count survive by design.
+- Audio settings (mute, volume) persist between visits.
+
+### Removed
+- Runtime dependencies on freesound.org previews, Google Fonts CDN and the Tailwind Play CDN.
+
+## [1.3.1] — 2026-06-25
+Hardening audit: keyboard and event leaks fixed, ambient audio retried on later gestures, guarded `localStorage`, complete EN localisation including ARIA labels, dialog semantics for panels, repaired noise texture, first Content-Security-Policy.
+
+## [1.3.0] — 2026-02-15
+Phase 3: in-page registration form (local only), puzzle layer (`IZ → TRUST / RESIST`), TR/EN language toggle, persistent session (last panel, command history).
+
+## [1.2.0] — 2026-02-15
+Phase 2: permanent command hint, accessibility pass (labels, focus states, tab order), mute and volume controls.
+
+## [1.1.0] — 2026-02-15
+Phase 1: Turkish-aware command normalisation, help text fixes, empty-input guard, glitch cleanup race fix. First README with user manual and roadmap.
+
+## [1.0.0] — 2025-07-24
+The original telescreen: giant eye following the pointer, CRT overlays, command terminal with on-screen keyboard, `DOSYA_734` and `ERİŞİM İZNİ_217` panels, ambient audio.
+
+[2.0.0]: https://github.com/Processtailor/locusmirabilis/compare/0073c1a...claude/focused-volta-7ls1ho
+[1.3.1]: https://github.com/Processtailor/locusmirabilis/commit/0073c1a
+[1.3.0]: https://github.com/Processtailor/locusmirabilis/commit/44cf272
+[1.2.0]: https://github.com/Processtailor/locusmirabilis/commit/71c2d86
+[1.1.0]: https://github.com/Processtailor/locusmirabilis/commit/e1d4fd3
+[1.0.0]: https://github.com/Processtailor/locusmirabilis/commit/eb6984f

@@ -1,941 +1,213 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-build="__BUILD__">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' https://freesound.org; connect-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
     <title>GÖZETİM ALTINDASIN</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    <style>
-        /* --- Base Styles --- */
-        body {
-            font-family: 'VT323', monospace;
-            background-color: #020202;
-            color: #b0b0b0;
-            overflow: hidden;
-        }
-
-        /* --- Overlay Effects --- */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        .scanline {
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0));
-            animation: scan 7s linear infinite;
-        }
-        .vignette { box-shadow: inset 0 0 20vw rgba(0, 0, 0, 0.9); }
-        .noise {
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiGAAAAA1BMVEX///+nxBvIAAAAIElEQVR42mP4BwYY/wEMgAL/gAL/gAL/gAL/gAL/gAL/gQL3BwDdNAb8k0qlGgAAAABJRU5ErkJggg==');
-            animation: noise 0.15s steps(3) infinite;
-        }
-
-        /* --- Fallback utilities (so core hide/show + a11y still work if the Tailwind CDN fails) --- */
-        .hidden { display: none !important; }
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* --- Main Content --- */
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            /* FIX: Use svh for small viewport height to account for mobile browser UI */
-            height: 100vh; /* Fallback */
-            height: 100svh;
-        }
-        .content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding-top: 1rem;
-            cursor: pointer;
-            min-height: 0; /* Prevents flexbox overflow */
-        }
-        
-        /* --- The Giant Eye --- */
-        #surveillance-eye {
-            width: 60vw;
-            max-width: 300px;
-            height: auto;
-            color: #ff2a2a;
-            filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5));
-            animation: pulse 5s ease-in-out infinite;
-        }
-        #pupil {
-            transition: transform 0.2s ease-out;
-        }
-        
-        .subtitle {
-            font-size: clamp(1.2rem, 4vw, 1.7rem);
-            color: #888;
-            margin-top: 1.5rem;
-            letter-spacing: 0.2rem;
-            animation: text-flicker 5s linear infinite;
-        }
-        .blinking-cursor {
-            color: #00ff41;
-            animation: blink 1s step-end infinite;
-        }
-
-        .command-hint {
-            margin-top: 1rem;
-            font-size: clamp(0.9rem, 2.4vw, 1.1rem);
-            color: #00ff41;
-            letter-spacing: 0.1rem;
-            opacity: 0.8;
-        }
-
-        .audio-controls {
-            margin-top: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            color: #00ff41;
-        }
-
-        .top-controls {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 60;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .history-panel {
-            margin-top: 1rem;
-            width: min(90vw, 450px);
-            border: 1px solid rgba(0, 255, 65, 0.25);
-            background: rgba(0, 255, 65, 0.04);
-            padding: 0.5rem 0.75rem;
-            color: #00ff41;
-            font-size: 1rem;
-            text-align: left;
-        }
-
-        .history-panel ul {
-            list-style: none;
-            margin: 0.3rem 0 0;
-            padding: 0;
-        }
-
-        .control-button {
-            border: 1px solid rgba(0, 255, 65, 0.35);
-            background: rgba(0, 255, 65, 0.08);
-            color: #00ff41;
-            padding: 0.35rem 0.7rem;
-            border-radius: 4px;
-        }
-
-        .volume-slider {
-            accent-color: #00ff41;
-            width: 120px;
-        }
-
-        .key:focus-visible,
-        .panel-link:focus-visible,
-        .control-button:focus-visible,
-        .volume-slider:focus-visible,
-        #main-content:focus-visible,
-        .panel:focus-visible {
-            outline: 2px solid #00ff41;
-            outline-offset: 2px;
-        }
-
-        /* --- Custom Keyboard --- */
-        #keyboard {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 50;
-            background: rgba(2, 2, 2, 0.85);
-            transform: translateY(100%);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-        }
-        #keyboard.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        #keyboard[aria-hidden="true"] {
-            pointer-events: none;
-        }
-        .key {
-            font-family: 'VT323', monospace;
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.2);
-            color: rgba(0, 255, 65, 0.7);
-            border-radius: 4px;
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
-            transition: background 0.1s, color 0.1s;
-        }
-        .key:active {
-            background: rgba(0, 255, 65, 0.2);
-            color: #fff;
-        }
-        .key.special {
-            flex-grow: 1;
-        }
-
-        /* --- Hidden Panels (Puzzle Sections) --- */
-        .panel {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-            flex-direction: column;
-            width: 100%;
-            cursor: pointer;
-            min-height: 0; /* Prevents flexbox overflow */
-        }
-        .panel-content {
-            border: 1px solid #ff4747;
-            padding: 1rem 2rem;
-            width: 100%;
-            max-width: 800px;
-            color: #ff4747;
-            text-shadow: 0 0 3px #ff4747;
-            overflow-y: auto; /* Allow scrolling within panel if needed */
-        }
-        .panel-content h2 { font-size: 2rem; margin-bottom: 1rem; text-align: center; }
-        .panel-content p, .panel-content a { font-size: 1.25rem; line-height: 1.7; }
-        .redacted { background-color: #ff4747; color: #ff4747; user-select: none; }
-        .panel-link { display: block; text-align: center; margin-top: 2rem; border: 1px solid #ff4747; padding: 0.5rem 1rem; text-decoration: none; color: #ff4747; transition: background-color 0.2s, color 0.2s; }
-        .panel-link:hover { background-color: #ff4747; color: #020202; cursor: crosshair; }
-        .exit-prompt { margin-top: 1rem; text-align: center; font-size: 1rem; color: #888; animation: text-flicker 7s linear infinite; }
-
-        /* --- Glitch Effects --- */
-        #glitch-container { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 50; }
-        .glitch-text { position: absolute; color: #00ff41; font-size: 1.5rem; opacity: 0; text-shadow: 0 0 5px #00ff41; white-space: nowrap; }
-
-        /* --- Animations --- */
-        @keyframes scan { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
-        @keyframes noise { 0%, 100% { background-position: 0 0; } 10% { background-position: -5% -10%; } 20% { background-position: -15% 5%; } 30% { background-position: 7% -25%; } 40% { background-position: 20% 25%; } 50% { background-position: -25% 10%; } 60% { background-position: 15% 5%; } 70% { background-position: 0% 15%; } 80% { background-position: 25% 35%; } 90% { background-position: -10% 10%; } }
-        @keyframes text-flicker { 0% { opacity: 0.8; } 2% { opacity: 1; } 8% { opacity: 0.5; } 9% { opacity: 1; } 12% { opacity: 0.9; } 20% { opacity: 1; } 25% { opacity: 0.6; } 30% { opacity: 1; } 70% { opacity: 1; } 72% { opacity: 0.7; } 77% { opacity: 1; } 100% { opacity: 1; } }
-        @keyframes blink { 50% { opacity: 0; } }
-        @keyframes pulse { 0% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); } 50% { transform: scale(1.02); filter: drop-shadow(0 0 15px #ff2a2a) drop-shadow(0 0 40px rgba(255, 42, 42, 0.7)); } 100% { transform: scale(1); filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 25px rgba(255, 42, 42, 0.5)); } }
-    
-        /* FIX: Media query for short screens (landscape mobile) */
-        @media (max-height: 600px) {
-            #surveillance-eye {
-                max-width: 150px;
-            }
-            .key {
-                font-size: 1rem;
-                padding: 0.4rem 0.6rem;
-            }
-        }
-    </style>
+    <meta name="description" content="Locus Mirabilis — a surveillance-state telescreen. Type a command. The system already knows what you meant.">
+    <meta name="theme-color" content="#020202">
+    <meta name="color-scheme" content="dark">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="GÖZETİM ALTINDASIN — Locus Mirabilis">
+    <meta property="og:description" content="Vatandaş tanımlanıyor. Saat on üçü vuruyor. Bir komut yazın.">
+    <meta property="og:url" content="https://processtailor.github.io/locusmirabilis/">
+    <meta property="og:image" content="https://processtailor.github.io/locusmirabilis/assets/img/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:locale:alternate" content="en_GB">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GÖZETİM ALTINDASIN — Locus Mirabilis">
+    <meta name="twitter:description" content="Vatandaş tanımlanıyor. Saat on üçü vuruyor. Bir komut yazın.">
+    <meta name="twitter:image" content="https://processtailor.github.io/locusmirabilis/assets/img/og.png">
+    <link rel="icon" href="./assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./assets/img/apple-touch-icon.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="preload" href="./assets/fonts/VT323-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./assets/fonts/VT323-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="./assets/css/styles.css?v=__BUILD__">
+    <script src="./assets/js/i18n.js?v=__BUILD__" defer></script>
+    <script src="./assets/js/audio.js?v=__BUILD__" defer></script>
+    <script src="./assets/js/app.js?v=__BUILD__" defer></script>
 </head>
-<body>
+<body data-mood="pending">
+    <noscript>
+        <p class="noscript">TELEKRAN ÇALIŞMIYOR. JAVASCRIPT KAPALI. BU DA KAYDEDİLDİ. — THE TELESCREEN REQUIRES JAVASCRIPT. THIS HAS BEEN NOTED.</p>
+    </noscript>
 
     <div class="overlay noise" aria-hidden="true"></div>
+    <div class="overlay scanlines" aria-hidden="true"></div>
     <div class="overlay scanline" aria-hidden="true"></div>
+    <div class="overlay flicker" aria-hidden="true"></div>
     <div class="overlay vignette" aria-hidden="true"></div>
     <div id="glitch-container" aria-hidden="true"></div>
-    <div id="top-controls" class="top-controls" role="group" aria-label="Genel kontroller">
-        <button id="language-toggle" class="control-button" type="button">DİL: TR</button>
+
+    <div id="boot" role="status" aria-live="polite">
+        <div id="boot-lines"></div>
+        <p class="boot-skip" id="boot-skip"></p>
     </div>
 
-    <div class="content-wrapper">
+    <header id="status-bar" class="status-bar" aria-label="Durum çubuğu">
+        <div class="sb-group sb-left">
+            <span class="sb-item sb-rec"><span class="rec-dot" aria-hidden="true"></span><span id="rec-label">KAYIT</span></span>
+            <span class="sb-item sb-clock" id="clock" aria-label="Saat. Daima on üç.">13:00:00</span>
+            <span class="sb-item sb-citizen"><span class="sb-label" id="citizen-label">VATANDAŞ</span> <span id="citizen-id">————</span></span>
+            <span class="sb-item sb-visit"><span class="sb-label" id="visit-label">ZİYARET</span> <span id="visit-count">1</span></span>
+            <span class="sb-item sb-status" id="status-item" data-state="pending"><span class="sb-label" id="status-label">DURUM</span> <span id="status-value">BEKLEMEDE</span></span>
+        </div>
+        <div class="sb-group sb-right" id="top-controls" role="group" aria-label="Genel kontroller">
+            <button id="mute-toggle" class="control-button" type="button" aria-pressed="false">SESSİZ: KAPALI</button>
+            <button id="language-toggle" class="control-button" type="button" aria-label="Dili değiştir (şu an Türkçe)">DİL: TR</button>
+        </div>
+    </header>
+
+    <div class="content-wrapper" id="content-wrapper">
         <main id="main-content" class="content" tabindex="0" aria-label="Ana terminal ekranı">
-            <svg id="surveillance-eye" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <g id="pupil">
-                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-4.41 0-8-2.69-9.72-6.5C3.96 7.61 7.59 5 12 5s8.04 2.61 9.72 6.5C20 14.81 16.41 17.5 12 17.5zm0-10.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
-                </g>
-            </svg>
-            <div class="subtitle">
-                <span>> </span><span id="typed-text"></span><span class="blinking-cursor">_</span>
-            </div>
-            <p class="command-hint" aria-live="polite">KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS</p>
-            <div id="audio-controls" class="audio-controls" role="group" aria-label="Ses kontrolleri">
-                <button id="mute-toggle" class="control-button" type="button" aria-pressed="false">SESSİZ: KAPALI</button>
-                <label id="volume-label" for="volume-control">SES</label>
-                <input id="volume-control" class="volume-slider" type="range" min="0" max="100" value="10" aria-label="Ses seviyesi">
-            </div>
-            <div class="history-panel" aria-live="polite">
-                <strong id="history-title">SON KOMUTLAR</strong>
-                <ul id="history-list"></ul>
+            <div class="stage">
+                <div class="eye-wrap">
+                    <svg id="surveillance-eye" viewBox="0 0 240 140" aria-hidden="true" focusable="false">
+                        <defs>
+                            <radialGradient id="iris-grad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0" stop-color="#ff7070"/>
+                                <stop offset="0.55" stop-color="#ff2a2a"/>
+                                <stop offset="1" stop-color="#5a0000"/>
+                            </radialGradient>
+                            <clipPath id="eye-clip">
+                                <path d="M12 70 C 50 5, 190 5, 228 70 C 190 135, 50 135, 12 70 Z"/>
+                            </clipPath>
+                        </defs>
+                        <path d="M12 70 C 50 5, 190 5, 228 70 C 190 135, 50 135, 12 70 Z" fill="rgba(20,0,0,0.65)" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+                        <g clip-path="url(#eye-clip)">
+                            <g id="pupil">
+                                <circle cx="120" cy="70" r="42" fill="url(#iris-grad)"/>
+                                <g stroke="#3a0000" stroke-width="1.3" opacity="0.6">
+                                    <line x1="120" y1="30" x2="120" y2="52"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(22.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(45 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(67.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(90 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(112.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(135 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(157.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(180 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(202.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(225 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(247.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(270 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(292.5 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(315 120 70)"/>
+                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(337.5 120 70)"/>
+                                </g>
+                                <circle cx="120" cy="70" r="42" fill="none" stroke="currentColor" stroke-width="2" opacity="0.85"/>
+                                <circle id="pupil-core" cx="120" cy="70" r="17" fill="#060000"/>
+                                <circle cx="106" cy="56" r="6" fill="#ffffff" opacity="0.85"/>
+                                <circle cx="132" cy="84" r="2.5" fill="#ffffff" opacity="0.45"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <div class="subtitle">
+                    <span>&gt; </span><span id="typed-text"></span><span class="blinking-cursor" aria-hidden="true">_</span>
+                </div>
+                <p class="command-hint" id="command-hint">KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS</p>
+                <p class="tap-hint" id="tap-hint">Yazmak için ekrana dokunun.</p>
+                <div id="audio-controls" class="audio-controls" role="group" aria-label="Ses kontrolleri">
+                    <label id="volume-label" for="volume-control">SES</label>
+                    <input id="volume-control" class="volume-slider" type="range" min="0" max="100" value="10" aria-label="Ses seviyesi">
+                </div>
+                <div class="history-panel">
+                    <strong id="history-title">SON KOMUTLAR</strong>
+                    <ul id="history-list"></ul>
+                </div>
             </div>
         </main>
 
-        <div id="info-panel" class="panel hidden" tabindex="0" role="dialog" aria-modal="true" aria-label="Bilgi paneli">
+        <div id="info-panel" class="panel hidden" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="dossier-title">
             <div class="panel-content">
+                <span class="stamp" id="dossier-stamp" aria-hidden="true">GİZLİ</span>
                 <h2 id="dossier-title">[ DOSYA_734 ERİŞİM SAĞLANDI ]</h2>
-                <p id="dossier-body">PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted" aria-hidden="true">████████████ Tiyatrosu</span><span class="sr-only">[gizli]</span>. TARİH: <span class="redacted" aria-hidden="true">HER GÜN</span><span class="sr-only">[gizli]</span>. SAAT: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[gizli]</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.</p>
-                <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
-            </div>
-        </div>
-        <div id="ticket-panel" class="panel hidden" tabindex="0" role="dialog" aria-modal="true" aria-label="Erişim izni paneli">
-            <div class="panel-content">
-                <h2 id="ticket-title">[ ERİŞİM İZNİ_217 ]</h2>
-                <p id="ticket-description">Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
-                <form id="registration-form" class="mt-6 space-y-3" novalidate>
-                    <label class="block">
-                        <span id="reg-name-label">KOD ADI</span>
-                        <input id="reg-name" class="w-full p-2 bg-black/30 border border-red-400" type="text" required maxlength="32" autocomplete="off" aria-describedby="registration-status">
-                    </label>
-                    <label class="block">
-                        <span id="reg-contact-label">İLETİŞİM KANALI</span>
-                        <input id="reg-contact" class="w-full p-2 bg-black/30 border border-red-400" type="email" required maxlength="80" autocomplete="off" aria-describedby="registration-status">
-                    </label>
-                    <button class="panel-link mt-0" type="submit" id="registration-submit">[ KAYDI TAMAMLA ]</button>
-                    <p id="registration-status" class="text-center min-h-[2rem]" role="status" aria-live="polite"></p>
-                </form>
-                <p class="exit-prompt">> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+                <div class="dossier" id="dossier-body"></div>
+                <section class="annex" aria-labelledby="annex-title">
+                    <h3 id="annex-title">EK-A: DENEK KAYDI</h3>
+                    <dl id="annex-list"></dl>
+                    <p class="note" id="annex-note"></p>
+                </section>
+                <div class="access-timer" id="access-timer" data-urgent="false">
+                    <span id="access-label">ERİŞİM SÜRESİ</span>
+                    <div class="access-bar" aria-hidden="true"><i id="access-bar"></i></div>
+                    <span id="access-value" aria-live="off">01:30</span>
+                </div>
+                <p class="exit-prompt">&gt; Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+                <p class="panel-prompt" aria-hidden="true"><span class="panel-prompt-text"></span><span class="blinking-cursor">_</span></p>
             </div>
         </div>
 
-        <div id="keyboard" class="p-1 md:p-2 flex flex-col gap-1 md:gap-2" role="group" aria-label="Ekran klavyesi" aria-hidden="true">
-            <div class="flex justify-center gap-1 md:gap-2">
-                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">E</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">R</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">T</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Y</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">U</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">I</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">O</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">P</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ğ</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ü</button>
-            </div>
-            <div class="flex justify-center gap-1 md:gap-2">
-                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">A</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">S</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">D</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">F</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">G</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">H</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">J</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">K</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">L</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ş</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">İ</button>
-            </div>
-            <div class="flex justify-center gap-1 md:gap-2">
-                <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Z</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">C</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">V</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">B</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">N</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">M</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ö</button> <button type="button" tabindex="-1" class="key p-2 text-lg md:p-3 md:text-xl">Ç</button>
-            </div>
-            <div class="flex justify-center gap-1 md:gap-2">
-                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="ESC">ESC</button>
-                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="SİL">SİL</button>
-                 <button type="button" tabindex="-1" class="key special p-2 text-lg md:p-3 md:text-xl" data-key="GİR">GİR</button>
+        <div id="ticket-panel" class="panel hidden" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="ticket-title">
+            <div class="panel-content">
+                <span class="stamp" id="ticket-stamp" aria-hidden="true">ZORUNLU</span>
+                <h2 id="ticket-title">[ ERİŞİM İZNİ_217 ]</h2>
+                <p id="ticket-description">Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.</p>
+                <form id="registration-form" class="permit-form" novalidate>
+                    <label class="field">
+                        <span class="field-label" id="form-no-label">FORM NO</span>
+                        <input id="form-no" type="text" readonly value="217/13-Δ" tabindex="-1" aria-readonly="true">
+                    </label>
+                    <label class="field">
+                        <span class="field-label" id="reg-name-label">KOD ADI</span>
+                        <input id="reg-name" type="text" required maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="registration-status">
+                    </label>
+                    <label class="field">
+                        <span class="field-label" id="reg-contact-label">İLETİŞİM KANALI</span>
+                        <input id="reg-contact" type="email" inputmode="email" required maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="registration-status">
+                    </label>
+                    <label class="consent">
+                        <input id="reg-consent" type="checkbox" required>
+                        <span id="reg-consent-label">Locus Mirabilis'in kurallarını ve gerçekliğini kabul ediyorum.</span>
+                    </label>
+                    <button class="panel-link" type="submit" id="registration-submit">[ KAYDI TAMAMLA ]</button>
+                    <p id="registration-status" class="registration-status" role="status" aria-live="polite"></p>
+                </form>
+                <div id="receipt" class="receipt hidden"></div>
+                <p class="privacy-note" id="privacy-note"></p>
+                <p class="exit-prompt">&gt; Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.</p>
+                <p class="panel-prompt" aria-hidden="true"><span class="panel-prompt-text"></span><span class="blinking-cursor">_</span></p>
             </div>
         </div>
     </div>
-    
-    <audio id="ambient-sound" loop preload="auto" src="https://freesound.org/data/previews/516/516377_10734399-lq.mp3"></audio>
-    <audio id="typing-sound" preload="auto" src="https://freesound.org/data/previews/254/254323_4243528-lq.mp3"></audio>
-    <audio id="error-sound" preload="auto" src="https://freesound.org/data/previews/142/142608_1843196-lq.mp3"></audio>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const typedTextEl = document.getElementById('typed-text');
-            const glitchContainer = document.getElementById('glitch-container');
-            const mainContent = document.getElementById('main-content');
-            const infoPanel = document.getElementById('info-panel');
-            const ticketPanel = document.getElementById('ticket-panel');
-            const pupil = document.getElementById('pupil');
-            const keyboard = document.getElementById('keyboard');
-            const keyboardKeys = keyboard.querySelectorAll('.key');
-            const muteToggle = document.getElementById('mute-toggle');
-            const volumeControl = document.getElementById('volume-control');
-            const languageToggle = document.getElementById('language-toggle');
-            const commandHintEl = document.querySelector('.command-hint');
-            const historyTitle = document.getElementById('history-title');
-            const historyList = document.getElementById('history-list');
-            const registrationForm = document.getElementById('registration-form');
-            const registrationStatus = document.getElementById('registration-status');
-            const regNameLabel = document.getElementById('reg-name-label');
-            const regContactLabel = document.getElementById('reg-contact-label');
-            const registrationSubmit = document.getElementById('registration-submit');
-            const ticketDescription = document.getElementById('ticket-description');
-            const dossierTitle = document.getElementById('dossier-title');
-            const dossierBody = document.getElementById('dossier-body');
-            const ticketTitle = document.getElementById('ticket-title');
-            const volumeLabel = document.getElementById('volume-label');
-            const topControls = document.getElementById('top-controls');
-            const audioControls = document.getElementById('audio-controls');
-            
-            const ambientSound = document.getElementById('ambient-sound');
-            const typingSound = document.getElementById('typing-sound');
-            const errorSound = document.getElementById('error-sound');
+    <footer class="ticker" id="ticker" aria-label="Bakanlık duyuruları">
+        <span class="ticker-label" id="build-stamp">DERLEME __BUILD__</span>
+        <div class="ticker-viewport" aria-hidden="true"><div class="ticker-track" id="ticker-track"></div></div>
+    </footer>
 
-            let userInput = '';
-            let audioUnlocked = false;
-            let isMuted = false;
-            let masterVolume = Number(volumeControl.value) / 100;
-            let language = 'TR';
-            let lastOpenedPanel = 'main';
-            let commandHistory = [];
-            let puzzleState = { dossierSeen: false, clueUnlocked: false, branch: 'none' };
-            let lastStatusKey = '';      // which registration status message is showing ('', 'regSuccess', 'regError')
-            let helpInterval = null;     // active YARDIM typewriter interval (so it can be cancelled)
-            let helpTimeout = null;      // pending help-clear timeout
-            const MAX_COMMAND_LENGTH = 20;
-            const HELP_COMMANDS = ['YARDIM', 'BILGI', 'BILET', 'IZIN', 'CIKIS'];
-            const SESSION_KEY = 'locusMirabilisSession';
-            const i18n = {
-                TR: {
-                    pageTitle: 'GÖZETİM ALTINDASIN',
-                    languageButton: 'DİL: TR',
-                    hint: 'KOMUT İPUCU: YARDIM, BILGI, BILET, IZIN, CIKIS',
-                    historyTitle: 'SON KOMUTLAR',
-                    emptyHistory: 'Henüz komut girilmedi.',
-                    ticketDescription: "Vatandaş katılımı, rejimin devamlılığı için esastır. Kaydınız, sisteme olan sadakatinizin bir göstergesidir. İzinsiz varlıklar tespit edilecek ve arındırılacaktır. Katılımınızı onaylayarak, Locus Mirabilis'in kurallarını ve gerçekliğini kabul etmiş olursunuz.",
-                    regName: 'KOD ADI',
-                    regContact: 'İLETİŞİM KANALI',
-                    regSubmit: '[ KAYDI TAMAMLA ]',
-                    regSuccess: 'Kayıt alındı. Sistem sizi izliyor.',
-                    regError: 'Geçerli ad ve iletişim kanalı girin.',
-                    helpPrefix: 'MEVCUT KOMUTLAR:',
-                    muteLabel: 'SESSİZ',
-                    muteOn: 'AÇIK',
-                    muteOff: 'KAPALI',
-                    volumeLabel: 'SES',
-                    volumeAria: 'Ses seviyesi',
-                    invalidCommand: 'GEÇERSİZ KOMUT',
-                    clueMessage: 'İPUCU: TRUST veya RESIST',
-                    trustMessage: 'SİSTEM SENİ ONAYLADI',
-                    resistMessage: 'DİRENİŞ KAYDEDİLDİ',
-                    registeredPrefix: 'KAYIT',
-                    dossierTitle: '[ DOSYA_734 ERİŞİM SAĞLANDI ]',
-                    dossierBody: 'PROJE: Locus Mirabilis. AMAÇ: Toplumsal uyum ve istikrarın sağlanması. MEVCUT DURUM: Faz 3 aktif. Vatandaşların katılımı zorunludur. YER: <span class="redacted" aria-hidden="true">████████████ Tiyatrosu</span><span class="sr-only">[gizli]</span>. TARİH: <span class="redacted" aria-hidden="true">HER GÜN</span><span class="sr-only">[gizli]</span>. SAAT: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[gizli]</span>. Gerçeklik yeniden tanımlanacak. Sorgulama.',
-                    ticketTitle: '[ ERİŞİM İZNİ_217 ]',
-                    exitPrompt: "> Çıkmak için 'CIKIS' yazın veya ESC tuşuna basın.",
-                    ariaTopControls: 'Genel kontroller',
-                    ariaMain: 'Ana terminal ekranı',
-                    ariaAudio: 'Ses kontrolleri',
-                    ariaInfoPanel: 'Bilgi paneli',
-                    ariaTicketPanel: 'Erişim izni paneli',
-                    ariaKeyboard: 'Ekran klavyesi',
-                    keyEsc: 'Çıkış',
-                    keyDelete: 'Sil',
-                    keyEnter: 'Komutu çalıştır',
-                    keySuffix: 'tuşu',
-                    glitchPhrases: ['SENİ DUYUYORLAR', 'İTAAT ET', 'SORGU SUAL YOK', 'GERÇEK NEDİR?', 'BÜYÜK BİRADER İZLİYOR', 'DÜŞÜNCE BİR SUÇTUR', 'SİSTEME GÜVEN', 'YALNIZ DEĞİLSİN']
-                },
-                EN: {
-                    pageTitle: 'YOU ARE UNDER SURVEILLANCE',
-                    languageButton: 'LANG: EN',
-                    hint: 'COMMAND HINT: HELP, INFO, TICKET, ACCESS, EXIT',
-                    historyTitle: 'RECENT COMMANDS',
-                    emptyHistory: 'No commands yet.',
-                    ticketDescription: 'Citizen participation is essential for regime continuity. Your registration proves your loyalty to the system. Unauthorized entities will be detected and purified. By confirming participation, you accept the rules and reality of Locus Mirabilis.',
-                    regName: 'CODE NAME',
-                    regContact: 'CONTACT CHANNEL',
-                    regSubmit: '[ COMPLETE REGISTRATION ]',
-                    regSuccess: 'Registration captured. The system is watching you.',
-                    regError: 'Provide a valid name and contact channel.',
-                    helpPrefix: 'AVAILABLE COMMANDS:',
-                    muteLabel: 'MUTE',
-                    muteOn: 'ON',
-                    muteOff: 'OFF',
-                    volumeLabel: 'VOL',
-                    volumeAria: 'Volume level',
-                    invalidCommand: 'INVALID COMMAND',
-                    clueMessage: 'CLUE: TRUST or RESIST',
-                    trustMessage: 'SYSTEM APPROVES YOU',
-                    resistMessage: 'RESISTANCE REGISTERED',
-                    registeredPrefix: 'REGISTERED',
-                    dossierTitle: '[ FILE_734 ACCESS GRANTED ]',
-                    dossierBody: 'PROJECT: Locus Mirabilis. PURPOSE: Ensuring social conformity and stability. CURRENT STATUS: Phase 3 active. Citizen participation is mandatory. LOCATION: <span class="redacted" aria-hidden="true">████████████ Theatre</span><span class="sr-only">[redacted]</span>. DATE: <span class="redacted" aria-hidden="true">EVERY DAY</span><span class="sr-only">[redacted]</span>. TIME: <span class="redacted" aria-hidden="true">20:00</span><span class="sr-only">[redacted]</span>. Reality will be redefined. Do not question.',
-                    ticketTitle: '[ ACCESS PERMIT_217 ]',
-                    exitPrompt: "> Type 'EXIT' or press ESC to exit.",
-                    ariaTopControls: 'Global controls',
-                    ariaMain: 'Main terminal screen',
-                    ariaAudio: 'Audio controls',
-                    ariaInfoPanel: 'Information panel',
-                    ariaTicketPanel: 'Access permit panel',
-                    ariaKeyboard: 'On-screen keyboard',
-                    keyEsc: 'Exit',
-                    keyDelete: 'Delete',
-                    keyEnter: 'Run command',
-                    keySuffix: 'key',
-                    glitchPhrases: ['THEY HEAR YOU', 'OBEY', 'NO QUESTIONS', 'WHAT IS REAL?', 'BIG BROTHER IS WATCHING', 'THOUGHT IS A CRIME', 'TRUST THE SYSTEM', 'YOU ARE NOT ALONE']
-                }
-            };
+    <div id="notice" class="notice" role="status" aria-live="polite" aria-atomic="true">
+        <span class="notice-label" id="notice-label">DUYURU</span>
+        <span class="notice-text" id="notice-text"></span>
+        <button class="notice-close" id="notice-close" type="button" aria-label="Duyuruyu kapat">×</button>
+    </div>
 
-            function normalizeCommand(value) {
-                const base = value
-                    .trim()
-                    .toLocaleUpperCase('tr-TR')
-                    .replace(/İ/g, 'I')
-                    .replace(/Ş/g, 'S')
-                    .replace(/Ğ/g, 'G')
-                    .replace(/Ü/g, 'U')
-                    .replace(/Ö/g, 'O')
-                    .replace(/Ç/g, 'C');
+    <div id="keyboard" role="group" aria-label="Ekran klavyesi" aria-hidden="true">
+        <div class="kb-row">
+            <button type="button" tabindex="-1" class="key num">1</button><button type="button" tabindex="-1" class="key num">2</button><button type="button" tabindex="-1" class="key num">3</button><button type="button" tabindex="-1" class="key num">4</button><button type="button" tabindex="-1" class="key num">5</button><button type="button" tabindex="-1" class="key num">6</button><button type="button" tabindex="-1" class="key num">7</button><button type="button" tabindex="-1" class="key num">8</button><button type="button" tabindex="-1" class="key num">9</button><button type="button" tabindex="-1" class="key num">0</button><button type="button" tabindex="-1" class="key num">+</button>
+        </div>
+        <div class="kb-row">
+            <button type="button" tabindex="-1" class="key">Q</button><button type="button" tabindex="-1" class="key">W</button><button type="button" tabindex="-1" class="key">E</button><button type="button" tabindex="-1" class="key">R</button><button type="button" tabindex="-1" class="key">T</button><button type="button" tabindex="-1" class="key">Y</button><button type="button" tabindex="-1" class="key">U</button><button type="button" tabindex="-1" class="key">I</button><button type="button" tabindex="-1" class="key">O</button><button type="button" tabindex="-1" class="key">P</button><button type="button" tabindex="-1" class="key">Ğ</button><button type="button" tabindex="-1" class="key">Ü</button>
+        </div>
+        <div class="kb-row">
+            <button type="button" tabindex="-1" class="key">A</button><button type="button" tabindex="-1" class="key">S</button><button type="button" tabindex="-1" class="key">D</button><button type="button" tabindex="-1" class="key">F</button><button type="button" tabindex="-1" class="key">G</button><button type="button" tabindex="-1" class="key">H</button><button type="button" tabindex="-1" class="key">J</button><button type="button" tabindex="-1" class="key">K</button><button type="button" tabindex="-1" class="key">L</button><button type="button" tabindex="-1" class="key">Ş</button><button type="button" tabindex="-1" class="key">İ</button>
+        </div>
+        <div class="kb-row">
+            <button type="button" tabindex="-1" class="key">Z</button><button type="button" tabindex="-1" class="key">X</button><button type="button" tabindex="-1" class="key">C</button><button type="button" tabindex="-1" class="key">V</button><button type="button" tabindex="-1" class="key">B</button><button type="button" tabindex="-1" class="key">N</button><button type="button" tabindex="-1" class="key">M</button><button type="button" tabindex="-1" class="key">Ö</button><button type="button" tabindex="-1" class="key">Ç</button>
+        </div>
+        <div class="kb-row">
+            <button type="button" tabindex="-1" class="key special" data-key="ESC">ESC</button>
+            <button type="button" tabindex="-1" class="key special" data-key="SİL">SİL</button>
+            <button type="button" tabindex="-1" class="key special" data-key="GİR">GİR</button>
+        </div>
+    </div>
 
-                const aliases = {
-                    HELP: 'YARDIM',
-                    INFO: 'BILGI',
-                    TICKET: 'BILET',
-                    ACCESS: 'IZIN',
-                    EXIT: 'CIKIS',
-                    TRACE: 'IZ'
-                };
-                return aliases[base] || base;
-            }
-
-            function safePlay(audioEl, startFromZero = false) {
-                if (!audioUnlocked || !audioEl) return;
-                if (startFromZero) {
-                    audioEl.currentTime = 0;
-                }
-                audioEl.play().catch(() => {});
-            }
-
-            function getLocaleText(key) {
-                return i18n[language][key];
-            }
-
-            function saveSessionState() {
-                const payload = {
-                    language,
-                    lastOpenedPanel,
-                    commandHistory,
-                    puzzleState
-                };
-                try {
-                    localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
-                } catch (e) {
-                    /* storage unavailable (private mode / quota / sandbox) — the session just won't persist */
-                }
-            }
-
-            function loadSessionState() {
-                let raw = null;
-                try {
-                    raw = localStorage.getItem(SESSION_KEY);
-                } catch (e) {
-                    return; // storage not accessible at all
-                }
-                if (!raw) return;
-                try {
-                    const parsed = JSON.parse(raw);
-                    language = parsed.language === 'EN' ? 'EN' : 'TR';
-                    lastOpenedPanel = parsed.lastOpenedPanel || 'main';
-                    commandHistory = Array.isArray(parsed.commandHistory)
-                        ? parsed.commandHistory.filter((c) => typeof c === 'string').slice(-6)
-                        : [];
-                    puzzleState = {
-                        dossierSeen: Boolean(parsed.puzzleState?.dossierSeen),
-                        clueUnlocked: Boolean(parsed.puzzleState?.clueUnlocked),
-                        branch: ['none', 'trust', 'resist'].includes(parsed.puzzleState?.branch) ? parsed.puzzleState.branch : 'none'
-                    };
-                } catch {
-                    try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
-                }
-            }
-
-            function renderHistory() {
-                historyList.innerHTML = '';
-                if (!commandHistory.length) {
-                    const li = document.createElement('li');
-                    li.textContent = getLocaleText('emptyHistory');
-                    historyList.appendChild(li);
-                    return;
-                }
-                commandHistory.slice().reverse().forEach((command) => {
-                    const li = document.createElement('li');
-                    li.textContent = `> ${command}`;
-                    historyList.appendChild(li);
-                });
-            }
-
-            function applyKeyLabels() {
-                const labels = {
-                    ESC: getLocaleText('keyEsc'),
-                    'SİL': getLocaleText('keyDelete'),
-                    'GİR': getLocaleText('keyEnter')
-                };
-                keyboardKeys.forEach((keyEl) => {
-                    const keyText = (keyEl.dataset.key || keyEl.textContent || '').trim();
-                    keyEl.setAttribute('aria-label', labels[keyText] || `${keyText} ${getLocaleText('keySuffix')}`);
-                });
-            }
-
-            function renderLanguage() {
-                document.documentElement.lang = language === 'EN' ? 'en' : 'tr';
-                document.title = getLocaleText('pageTitle');
-                languageToggle.textContent = getLocaleText('languageButton');
-                commandHintEl.textContent = getLocaleText('hint');
-                historyTitle.textContent = getLocaleText('historyTitle');
-                ticketDescription.textContent = getLocaleText('ticketDescription');
-                regNameLabel.textContent = getLocaleText('regName');
-                regContactLabel.textContent = getLocaleText('regContact');
-                registrationSubmit.textContent = getLocaleText('regSubmit');
-                dossierTitle.textContent = getLocaleText('dossierTitle');
-                dossierBody.innerHTML = getLocaleText('dossierBody'); // author-controlled constant (redaction markup, no user input)
-                ticketTitle.textContent = getLocaleText('ticketTitle');
-                volumeLabel.textContent = getLocaleText('volumeLabel');
-
-                topControls.setAttribute('aria-label', getLocaleText('ariaTopControls'));
-                mainContent.setAttribute('aria-label', getLocaleText('ariaMain'));
-                audioControls.setAttribute('aria-label', getLocaleText('ariaAudio'));
-                volumeControl.setAttribute('aria-label', getLocaleText('volumeAria'));
-                infoPanel.setAttribute('aria-label', getLocaleText('ariaInfoPanel'));
-                ticketPanel.setAttribute('aria-label', getLocaleText('ariaTicketPanel'));
-                keyboard.setAttribute('aria-label', getLocaleText('ariaKeyboard'));
-
-                document.querySelectorAll('.exit-prompt').forEach((el) => {
-                    el.textContent = getLocaleText('exitPrompt');
-                });
-
-                applyKeyLabels();
-                updateMuteButtonText();
-
-                // Re-localize (rather than wipe) any registration status that is currently showing.
-                registrationStatus.textContent = lastStatusKey ? getLocaleText(lastStatusKey) : '';
-
-                renderHistory();
-            }
-
-            function pushCommandToHistory(command) {
-                commandHistory.push(command);
-                if (commandHistory.length > 6) {
-                    commandHistory.shift();
-                }
-                renderHistory();
-            }
-
-            function isVisiblePanelOpen() {
-                return !infoPanel.classList.contains('hidden') || !ticketPanel.classList.contains('hidden');
-            }
-
-            function applyAudioSettings() {
-                const effectVolume = Math.min(1, masterVolume * 2.5);
-                [ambientSound, typingSound, errorSound].forEach((audioEl) => {
-                    audioEl.muted = isMuted;
-                });
-                ambientSound.volume = masterVolume;
-                typingSound.volume = effectVolume;
-                errorSound.volume = effectVolume;
-            }
-
-            function ensureAmbient() {
-                // Retry the ambient loop whenever the user gives us a gesture — a failed first
-                // autoplay (or a transient remote-audio error) shouldn't silence it for the session.
-                if (!audioUnlocked || isMuted) return;
-                if (ambientSound.paused) {
-                    ambientSound.play().catch(() => {});
-                }
-            }
-
-            function updateMuteButtonText() {
-                muteToggle.textContent = `${getLocaleText('muteLabel')}: ${isMuted ? getLocaleText('muteOn') : getLocaleText('muteOff')}`;
-                muteToggle.setAttribute('aria-pressed', String(isMuted));
-            }
-
-            function setKeyboardVisibility(isVisible) {
-                keyboard.classList.toggle('visible', isVisible);
-                keyboard.setAttribute('aria-hidden', String(!isVisible));
-                keyboardKeys.forEach((keyEl) => {
-                    keyEl.tabIndex = isVisible ? 0 : -1;
-                });
-            }
-
-            function cancelHelp() {
-                if (helpInterval) { clearInterval(helpInterval); helpInterval = null; }
-                if (helpTimeout) { clearTimeout(helpTimeout); helpTimeout = null; }
-            }
-
-            function startExperience() {
-                if (audioUnlocked) return;
-                
-                audioUnlocked = true;
-                applyAudioSettings();
-                ensureAmbient();
-
-                // Warm up the effect sounds while muted, so first real playback is instant (no audible blip here).
-                [typingSound, errorSound].forEach((audioEl) => {
-                    audioEl.muted = true;
-                    audioEl.play().then(() => {
-                        audioEl.pause();
-                        audioEl.currentTime = 0;
-                        audioEl.muted = isMuted;
-                    }).catch(() => {
-                        audioEl.muted = isMuted;
-                    });
-                });
-
-                document.removeEventListener('click', startExperience);
-                document.removeEventListener('keydown', startExperience);
-            }
-            document.addEventListener('click', startExperience);
-            document.addEventListener('keydown', startExperience);
-            loadSessionState();
-            setKeyboardVisibility(false);
-            applyAudioSettings();
-            renderLanguage();
-
-            if (lastOpenedPanel === 'info') {
-                puzzleState.dossierSeen = true;
-                showPanel(infoPanel, { focus: false });
-            } else if (lastOpenedPanel === 'ticket') {
-                showPanel(ticketPanel, { focus: false });
-            }
-
-            function handleInput(key) {
-                if (key === 'GİR') {
-                    if (userInput.trim()) {
-                        processCommand(userInput);
-                    }
-                    userInput = '';
-                } else if (key === 'SİL') {
-                    cancelHelp();
-                    userInput = userInput.slice(0, -1);
-                } else if (/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(key) && userInput.length < MAX_COMMAND_LENGTH) {
-                    cancelHelp();
-                    userInput += key.toLocaleUpperCase('tr-TR');
-                    safePlay(typingSound, true);
-                }
-                // Don't fight the YARDIM typewriter for the same text node; it manages its own output.
-                if (!helpInterval) {
-                    typedTextEl.textContent = userInput;
-                }
-                if (Math.random() < 0.2) createGlitch();
-            }
-
-            function triggerEscape() {
-                if (isVisiblePanelOpen()) {
-                    hideAllPanels();
-                    cancelHelp();
-                    userInput = '';
-                    typedTextEl.textContent = userInput;
-                }
-            }
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    triggerEscape();
-                    return;
-                }
-                const target = e.target;
-                // Focused form fields own their own typing (no leak into the command buffer / no double-submit).
-                if (target?.matches?.('input, textarea, select') || target?.isContentEditable) {
-                    return;
-                }
-                // Enter/Space on a focused button activates it via a native click — don't also run the global handler.
-                if ((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') && target?.matches?.('button, [role="button"]')) {
-                    return;
-                }
-                // Ignore browser/OS shortcuts (Ctrl/Cmd/Alt combos).
-                if (e.ctrlKey || e.metaKey || e.altKey) return;
-
-                if (e.key === 'Enter') handleInput('GİR');
-                else if (e.key === 'Backspace') handleInput('SİL');
-                else if (e.key.length === 1) handleInput(e.key);
-            });
-
-            keyboard.addEventListener('click', (e) => {
-                const keyBtn = e.target.closest('.key');
-                if (!keyBtn) return;
-                const key = (keyBtn.dataset.key || keyBtn.textContent || '').trim();
-                if (key === 'ESC') {
-                    triggerEscape();
-                    return;
-                }
-                handleInput(key);
-            });
-            
-            mainContent.addEventListener('click', () => {
-                setKeyboardVisibility(true);
-                ensureAmbient();
-            });
-
-            infoPanel.addEventListener('click', () => {
-                setKeyboardVisibility(true);
-            });
-            ticketPanel.addEventListener('click', (e) => {
-                // Don't pop the on-screen keyboard over the registration form fields.
-                if (e.target.closest('#registration-form')) return;
-                setKeyboardVisibility(true);
-            });
-
-            muteToggle.addEventListener('click', () => {
-                isMuted = !isMuted;
-                updateMuteButtonText();
-                applyAudioSettings();
-                ensureAmbient();
-            });
-
-            languageToggle.addEventListener('click', () => {
-                language = language === 'TR' ? 'EN' : 'TR';
-                renderLanguage();
-                saveSessionState();
-            });
-
-            ['reg-name', 'reg-contact'].forEach((id) => {
-                document.getElementById(id).addEventListener('input', (e) => {
-                    e.target.setAttribute('aria-invalid', 'false');
-                });
-            });
-
-            registrationForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                const nameField = document.getElementById('reg-name');
-                const contactField = document.getElementById('reg-contact');
-                const nameValue = nameField.value.trim();
-                const nameValid = nameValue.length > 0;
-                const contactValid = contactField.checkValidity();
-
-                nameField.setAttribute('aria-invalid', String(!nameValid));
-                contactField.setAttribute('aria-invalid', String(!contactValid));
-
-                if (!nameValid || !contactValid) {
-                    lastStatusKey = 'regError';
-                    registrationStatus.textContent = getLocaleText('regError');
-                    safePlay(errorSound, true);
-                    (!nameValid ? nameField : contactField).focus();
-                    return;
-                }
-                lastStatusKey = 'regSuccess';
-                registrationStatus.textContent = getLocaleText('regSuccess');
-                createGlitch(`${getLocaleText('registeredPrefix')}: ${nameValue}`);
-                nameField.value = '';
-                contactField.value = '';
-            });
-
-            volumeControl.addEventListener('input', (event) => {
-                masterVolume = Number(event.target.value) / 100;
-                applyAudioSettings();
-                ensureAmbient();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                const x = (e.clientX / window.innerWidth - 0.5) * 2;
-                const y = (e.clientY / window.innerHeight - 0.5) * 2;
-                const maxOffset = 1.5;
-                pupil.style.transform = `translate(${x * maxOffset}px, ${y * maxOffset}px)`;
-            });
-
-            function processCommand(command) {
-                const normalizedCommand = normalizeCommand(command);
-
-                // While a panel is open the input line is hidden; only honor the documented exit
-                // command so stray/blind typing can't silently switch panels.
-                if (isVisiblePanelOpen() && normalizedCommand !== 'CIKIS') {
-                    return;
-                }
-
-                pushCommandToHistory(normalizedCommand);
-
-                switch (normalizedCommand) {
-                    case 'YARDIM':
-                        displayHelp();
-                        break;
-                    case 'BILGI':
-                        puzzleState.dossierSeen = true;
-                        showPanel(infoPanel);
-                        break;
-                    case 'BILET':
-                    case 'IZIN':
-                        showPanel(ticketPanel);
-                        break;
-                    case 'IZ':
-                        if (puzzleState.dossierSeen) {
-                            puzzleState.clueUnlocked = true;
-                            createGlitch(getLocaleText('clueMessage'));
-                        } else {
-                            safePlay(errorSound, true);
-                            createGlitch(getLocaleText('invalidCommand'));
-                        }
-                        break;
-                    case 'TRUST':
-                        if (puzzleState.clueUnlocked) {
-                            puzzleState.branch = 'trust';
-                            createGlitch(getLocaleText('trustMessage'));
-                        } else {
-                            safePlay(errorSound, true);
-                            createGlitch(getLocaleText('invalidCommand'));
-                        }
-                        break;
-                    case 'RESIST':
-                        if (puzzleState.clueUnlocked) {
-                            puzzleState.branch = 'resist';
-                            createGlitch(getLocaleText('resistMessage'));
-                        } else {
-                            safePlay(errorSound, true);
-                            createGlitch(getLocaleText('invalidCommand'));
-                        }
-                        break;
-                    case 'CIKIS':
-                        hideAllPanels();
-                        break;
-                    default:
-                        safePlay(errorSound, true);
-                        createGlitch(getLocaleText('invalidCommand'));
-                        break;
-                }
-                saveSessionState();
-            }
-
-            function displayHelp() {
-                cancelHelp();
-                const commandSet = language === 'TR'
-                    ? HELP_COMMANDS.join(', ') + ', IZ'
-                    : 'HELP, INFO, TICKET, ACCESS, EXIT, TRACE';
-                const helpText = `${getLocaleText('helpPrefix')} ${commandSet}`;
-                let i = 0;
-                userInput = '';
-                typedTextEl.textContent = '';
-                helpInterval = setInterval(() => {
-                    if (i < helpText.length) {
-                        typedTextEl.textContent += helpText[i];
-                        i++;
-                    } else {
-                        clearInterval(helpInterval);
-                        helpInterval = null;
-                        helpTimeout = setTimeout(() => { typedTextEl.textContent = ''; helpTimeout = null; }, 2000);
-                    }
-                }, 50);
-            }
-
-            function showPanel(panel, { focus = true } = {}) {
-                cancelHelp();
-                userInput = '';
-                mainContent.classList.add('hidden');
-                setKeyboardVisibility(false);
-                infoPanel.classList.add('hidden');
-                ticketPanel.classList.add('hidden');
-                panel.classList.remove('hidden');
-                if (focus) panel.focus();
-                lastOpenedPanel = panel === infoPanel ? 'info' : 'ticket';
-                saveSessionState();
-            }
-
-            function hideAllPanels() {
-                mainContent.classList.remove('hidden');
-                setKeyboardVisibility(false);
-                infoPanel.classList.add('hidden');
-                ticketPanel.classList.add('hidden');
-                mainContent.focus();
-                lastOpenedPanel = 'main';
-                saveSessionState();
-            }
-
-            function createGlitch(text) {
-                const glitch = document.createElement('div');
-                glitch.className = 'glitch-text';
-                const phrases = getLocaleText('glitchPhrases');
-                glitch.textContent = text || phrases[Math.floor(Math.random() * phrases.length)];
-                glitch.style.top = `${Math.random() * 100}vh`;
-                glitch.style.left = `${Math.random() * 100}vw`;
-                
-                glitchContainer.appendChild(glitch);
-
-                setTimeout(() => { glitch.style.opacity = 1; }, 50);
-                setTimeout(() => { glitch.style.opacity = 0; }, 200 + Math.random() * 300);
-                setTimeout(() => { if (glitch.parentNode === glitchContainer) glitchContainer.removeChild(glitch); }, 1000);
-            }
-        });
-    </script>
-
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true" aria-label="Sistem mesajları"></div>
 </body>
 </html>

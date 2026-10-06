@@ -1,0 +1,26 @@
+{
+  "name": "locus-mirabilis",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Locus Mirabilis — a surveillance-state telescreen. An interactive dystopian web experience.",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "lint": "eslint .",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:e2e": "playwright test",
+    "test": "npm run lint && npm run test:unit && npm run test:e2e",
+    "build": "node scripts/build.js",
+    "images": "node scripts/make-images.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "eslint": "10.12.0",
+    "globals": "17.13.0"
+  }
+}

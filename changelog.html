@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; base-uri 'self'; object-src 'none'">
+    <title>DEĞİŞİKLİK KAYDI — Locus Mirabilis</title>
+    <meta name="description" content="Locus Mirabilis sürüm geçmişi. Her değişiklik kaydedilmiştir. Hiçbir değişiklik yapılmamıştır.">
+    <meta name="theme-color" content="#020202">
+    <link rel="icon" href="./assets/img/favicon.svg" type="image/svg+xml">
+    <style>
+        @font-face { font-family: 'VT323'; font-style: normal; font-weight: 400; font-display: swap; src: url('./assets/fonts/VT323-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+        @font-face { font-family: 'VT323'; font-style: normal; font-weight: 400; font-display: swap; src: url('./assets/fonts/VT323-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+        @font-face { font-family: 'Orbitron'; font-style: normal; font-weight: 400 900; font-display: swap; src: url('./assets/fonts/Orbitron-latin.woff2') format('woff2'); }
+
+        :root { color-scheme: dark; --g: #00ff41; --gd: rgba(0,255,65,.6); --gf: rgba(0,255,65,.2); --r: #ff4747; --amber: #ffb000; --ink: #c4c4c4; --muted: #7a7a7a; }
+        * { box-sizing: border-box; }
+        html { background: #020202; }
+        body {
+            margin: 0; min-height: 100vh; padding: 2rem 1rem 5rem;
+            font-family: 'VT323', 'Courier New', monospace; font-size: 19px; line-height: 1.45;
+            color: var(--ink); background: #020202;
+        }
+        body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 10; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.18) 2px 3px); }
+        body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 11; box-shadow: inset 0 0 18vw rgba(0,0,0,.9); }
+        main { position: relative; max-width: 56rem; margin: 0 auto; }
+        header { position: relative; border: 1px solid var(--gf); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; background: rgba(0,255,65,.03); }
+        .kicker { color: var(--gd); letter-spacing: .25em; font-size: .95rem; margin: 0; }
+        h1 { margin: .35rem 0 .25rem; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1; letter-spacing: .1em; color: var(--g); text-shadow: 0 0 8px rgba(0,255,65,.45); font-weight: 400; }
+        .sub { margin: 0; color: var(--muted); }
+        .stamp { position: absolute; top: .9rem; right: 1rem; padding: .15rem .6rem; border: 3px double var(--r); color: var(--r); font-family: 'Orbitron', monospace; font-size: .7rem; letter-spacing: .25em; transform: rotate(-10deg); opacity: .8; }
+        nav { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.25rem 0 0; }
+        nav a { display: inline-block; padding: .45rem .9rem; border: 1px solid var(--g); color: var(--g); text-decoration: none; letter-spacing: .08em; }
+        nav a:hover, nav a:focus-visible { background: var(--g); color: #020202; outline: none; }
+        nav a.ghost { border-color: var(--gf); color: var(--gd); }
+        nav a.ghost:hover, nav a.ghost:focus-visible { background: var(--gd); color: #020202; }
+        article { position: relative; border-left: 2px solid var(--gf); padding: .25rem 0 .5rem 1.5rem; margin: 0 0 2rem; }
+        article::before { content: ''; position: absolute; left: -7px; top: .75rem; width: 12px; height: 12px; border-radius: 50%; background: var(--g); box-shadow: 0 0 10px var(--g); }
+        article.minor::before { background: #0a4a1a; box-shadow: none; border: 1px solid var(--gd); }
+        h2 { margin: 0; font-size: 1.6rem; letter-spacing: .08em; color: var(--g); font-weight: 400; }
+        h2 small { color: var(--muted); font-size: 1rem; letter-spacing: .15em; margin-left: .5rem; }
+        .meta { margin: .15rem 0 .75rem; color: var(--muted); font-size: 1rem; letter-spacing: .08em; }
+        .lead { color: var(--ink); margin: 0 0 .75rem; }
+        h3 { margin: 1rem 0 .25rem; font-size: 1rem; letter-spacing: .25em; color: var(--gd); font-weight: 400; }
+        ul { margin: 0; padding-left: 1.2rem; }
+        li { margin: .2rem 0; }
+        li::marker { color: var(--gd); }
+        code { font-family: inherit; color: var(--amber); }
+        details { margin-top: .75rem; }
+        summary { cursor: pointer; color: var(--gd); letter-spacing: .12em; font-size: 1rem; }
+        summary:hover { color: var(--g); }
+        .minor .lead { color: var(--muted); }
+        footer { margin-top: 3rem; color: #3a3a3a; font-size: .9rem; letter-spacing: .12em; text-align: center; }
+        @media (max-width: 600px) { .stamp { position: static; display: inline-block; margin-top: .75rem; transform: none; } }
+        @media (prefers-reduced-motion: no-preference) { article::before { animation: pulse 3s ease-in-out infinite; } @keyframes pulse { 50% { box-shadow: 0 0 18px var(--g); } } }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <p class="kicker">DOSYA_734 / EK-C</p>
+        <h1>DEĞİŞİKLİK KAYDI</h1>
+        <p class="sub">Her değişiklik kaydedilmiştir. Hiçbir değişiklik yapılmamıştır. — Every change has been recorded. No changes were made.</p>
+        <span class="stamp" aria-hidden="true">BAKANLIK ONAYLI</span>
+        <nav aria-label="Sürümler">
+            <a href="./">&gt; CANLI TELEKRAN (v2)</a>
+            <a class="ghost" href="./archive/v1/">&gt; ARŞİV: ÖNCEKİ SÜRÜM (v1.3.1)</a>
+            <a class="ghost" href="./CHANGELOG.md">&gt; CHANGELOG.md</a>
+        </nav>
+    </header>
+
+    <article>
+        <h2>2.0.0 <small>"TELEKRAN"</small></h2>
+        <p class="meta">2026-10-06 · DERLEME __BUILD__ · ANA SÜRÜM</p>
+        <p class="lead">Üretim yeniden yapımı. Konsept aynı: göz, komut terminali, <code>DOSYA_734</code>, <code>ERİŞİM İZNİ_217</code>, <code>IZ → TRUST / RESIST</code> bulmacası. Etrafındaki her şey, hiçbir zaman tam olarak kontrolünüzde olmayan Kafkaesk ve Orwellvari bir telekran olarak yeniden inşa edildi.</p>
+
+        <h3>EKLENDİ</h3>
+        <ul>
+            <li>Açılış dizisi: vatandaş tanımlanır, saat on üçü vurur. Geri dönenler tanınır ("gitmediğinizi biliyorduk").</li>
+            <li>Kalıcı vatandaş numarası, ziyaret sayacı, sadakat durumu (BEKLEMEDE / ONAYLI / ŞÜPHELİ) ve daima 13:xx gösteren saat.</li>
+            <li>Paneller açılmadan önce bürokratik işlem ("Birim 4'e iletildi — Birim 4 yanıt vermiyor — Onaylandı"); kayıtta altı adımlı onay dansı ve hiçbir hak doğurmayan makbuz.</li>
+            <li>Dosyaya EK-A: tarayıcının sizin hakkınızda görebildikleri (tamamen yerel, hiçbir yere gönderilmez), yalnızca bir an görülebilen karartmalar ve 90 saniyelik erişim süresi.</li>
+            <li>Gizli komutlar: <code>KIMIM</code>, <code>SAAT</code>, <code>NEDEN</code>, <code>HAYIR</code>, <code>EVET</code>, <code>ITIRAZ</code>, <code>2+2</code>, <code>1984</code>, <code>BIRADER</code>, <code>LOCUS</code>, <code>UNUT</code> ve <code>101</code> (TRUST ya da RESIST'ten sonra Oda 101). İngilizce karşılıkları da çalışır.</li>
+            <li>Yanlış yazılan komutlar sizin yerinize düzeltilir ("Ne demek istediğinizi biliyoruz"); geçersiz komutlar birikir ve sonunda ŞÜPHELİ damgası vurulur.</li>
+            <li>Boş durduğunuzda komut satırı kendi kendine yazar; Bakanlık duyuruları; Yenisöylem haber bandı; sekmeden ayrılmanız fark edilir ("Neredeydin?"); ekran arada senkron kaybeder.</li>
+            <li>Göz kırpar, siz durunca gezinir, direnince dik dik bakar, Oda 101'de kapanır. Parıltısı sadakatinizi izler.</li>
+            <li>Tamamen üretilmiş ses (Web Audio): uğultu, şebeke vınlaması, tuş, hata, alarm, kepenk. Harici ses dosyası yok.</li>
+            <li>PWA: manifest, simgeler, çevrimdışı çalışan servis işçisi, kurgu içi 404 sayfası, paylaşım görseli.</li>
+            <li>Araçlar: ESLint, TR/EN içerik eşleşme testleri, Playwright uçtan uca testler (masaüstü + telefon), GitHub Actions CI ve derleme damgalı GitHub Pages dağıtımı.</li>
+            <li>Bu sayfa ve yan yana karşılaştırma için v1 arşivi.</li>
+        </ul>
+
+        <h3>DEĞİŞTİ</h3>
+        <ul>
+            <li>Tek 48 KB'lık dosya; <code>index.html</code>, <code>styles.css</code>, <code>i18n.js</code> (tüm anlatı metni), <code>audio.js</code> ve <code>app.js</code> olarak bölündü.</li>
+            <li>Yazı tipleri kendi sunucumuzdan; Tailwind CDN kaldırıldı; Content-Security-Policy yalnızca <code>'self'</code> (satır içi betik ve stil yok).</li>
+            <li>Kayıt formuna form numarası ve zorunlu "gerçekliği kabul ediyorum" onayı eklendi; kayıt hatırlanır, ikinci kayıt da kaydedilir.</li>
+            <li>Ekran klavyesine rakam satırı (<code>101</code> ve <code>2+2</code> için) ve Q / W / X tuşları eklendi; panel açıkken yazılanlar panelin içinde yankılanır.</li>
+            <li><code>UNUT</code> / <code>FORGET</code> oturumu sıfırlar (iki adımlı onay); vatandaş numarası ve ziyaret sayısı bilerek kalır.</li>
+            <li>Ses ayarları (sessiz, seviye) ziyaretler arasında korunur.</li>
+        </ul>
+
+        <h3>KALDIRILDI</h3>
+        <ul>
+            <li>freesound.org, Google Fonts CDN ve Tailwind Play CDN bağımlılıkları.</li>
+        </ul>
+
+        <details>
+            <summary>ENGLISH SUMMARY</summary>
+            <ul>
+                <li>Boot sequence, persistent citizen number, visit counter, loyalty status and a clock that always strikes thirteen.</li>
+                <li>Bureaucratic processing before panels open; six-step registration approval ending in a receipt that confers no rights.</li>
+                <li>Dossier annex with what the browser can see (all local), glimpse-only redactions, 90-second access window.</li>
+                <li>Hidden commands (KIMIM/WHOAMI, SAAT/TIME, NEDEN/WHY, HAYIR/NO, EVET/YES, ITIRAZ/APPEAL, 2+2, 1984, BIRADER/BROTHER, LOCUS, UNUT/FORGET, 101), autocorrection, escalating invalid responses.</li>
+                <li>Idle intrusions, ministry notices, Newspeak ticker, tab-switch detection, sync wobble; the eye blinks, wanders, stares and closes.</li>
+                <li>Procedural Web Audio; PWA with offline shell; ESLint, unit + Playwright tests, CI and GitHub Pages deploy; fonts self-hosted, CDNs removed, strict CSP.</li>
+            </ul>
+        </details>
+    </article>
+
+    <article class="minor">
+        <h2>1.3.1</h2>
+        <p class="meta">2026-06-25 · SIKILAŞTIRMA</p>
+        <p class="lead">Denetim sonrası düzeltmeler: klavye/olay sızıntıları, ortam sesinin yeniden denenmesi, korumalı <code>localStorage</code>, ARIA dahil tam İngilizce yerelleştirme, panellerde dialog semantiği, onarılan parazit dokusu, ilk Content-Security-Policy.</p>
+    </article>
+
+    <article class="minor">
+        <h2>1.3.0</h2>
+        <p class="meta">2026-02-15 · FAZ 3</p>
+        <p class="lead">Sayfa içi kayıt formu (yalnızca yerel), bulmaca katmanı (<code>IZ → TRUST / RESIST</code>), TR/EN dil anahtarı, kalıcı oturum (son panel, komut geçmişi).</p>
+    </article>
+
+    <article class="minor">
+        <h2>1.2.0</h2>
+        <p class="meta">2026-02-15 · FAZ 2</p>
+        <p class="lead">Kalıcı komut ipucu, erişilebilirlik geçişi (etiketler, odak durumları, sekme sırası), sessiz ve ses seviyesi kontrolleri.</p>
+    </article>
+
+    <article class="minor">
+        <h2>1.1.0</h2>
+        <p class="meta">2026-02-15 · FAZ 1</p>
+        <p class="lead">Türkçe karakterlere duyarlı komut normalleştirme, yardım metni düzeltmeleri, boş giriş koruması, glitch temizleme yarışı düzeltmesi. Kullanım kılavuzu ve yol haritalı ilk README.</p>
+    </article>
+
+    <article class="minor">
+        <h2>1.0.0</h2>
+        <p class="meta">2025-07-24 · İLK KAYIT</p>
+        <p class="lead">Özgün telekran: imleci izleyen dev göz, CRT katmanları, ekran klavyeli komut terminali, <code>DOSYA_734</code> ve <code>ERİŞİM İZNİ_217</code> panelleri, ortam sesi.</p>
+    </article>
+
+    <footer>BU KAYIT KENDİSİ DE KAYDEDİLMİŞTİR · __BUILD_DATE__</footer>
+</main>
+</body>
+</html>
