@@ -67,46 +67,24 @@
         <main id="main-content" class="content" tabindex="0" aria-label="Ana terminal ekranı">
             <div class="stage">
                 <div class="eye-wrap">
-                    <svg id="surveillance-eye" viewBox="0 0 240 140" aria-hidden="true" focusable="false">
-                        <defs>
-                            <radialGradient id="iris-grad" cx="50%" cy="50%" r="50%">
-                                <stop offset="0" stop-color="#ff7070"/>
-                                <stop offset="0.55" stop-color="#ff2a2a"/>
-                                <stop offset="1" stop-color="#5a0000"/>
-                            </radialGradient>
-                            <clipPath id="eye-clip">
-                                <path d="M12 70 C 50 5, 190 5, 228 70 C 190 135, 50 135, 12 70 Z"/>
-                            </clipPath>
-                        </defs>
-                        <path d="M12 70 C 50 5, 190 5, 228 70 C 190 135, 50 135, 12 70 Z" fill="rgba(20,0,0,0.65)" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
-                        <g clip-path="url(#eye-clip)">
-                            <g id="pupil">
-                                <circle cx="120" cy="70" r="42" fill="url(#iris-grad)"/>
-                                <g stroke="#3a0000" stroke-width="1.3" opacity="0.6">
-                                    <line x1="120" y1="30" x2="120" y2="52"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(22.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(45 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(67.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(90 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(112.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(135 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(157.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(180 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(202.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(225 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(247.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(270 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(292.5 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(315 120 70)"/>
-                                    <line x1="120" y1="30" x2="120" y2="52" transform="rotate(337.5 120 70)"/>
-                                </g>
-                                <circle cx="120" cy="70" r="42" fill="none" stroke="currentColor" stroke-width="2" opacity="0.85"/>
-                                <circle id="pupil-core" cx="120" cy="70" r="17" fill="#060000"/>
-                                <circle cx="106" cy="56" r="6" fill="#ffffff" opacity="0.85"/>
-                                <circle cx="132" cy="84" r="2.5" fill="#ffffff" opacity="0.45"/>
-                            </g>
-                        </g>
-                    </svg>
+                    <svg id="surveillance-eye" viewBox="0 0 240 140" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
+                        <defs><clipPath id="eye-opening"><path d="M95 20h50v5h-50zM75 25h90v5h-90zM65 30h110v5h-110zM55 35h130v5h-130zM45 40h150v5h-150zM35 45h170v5h-170zM30 50h180v5h-180zM25 55h190v5h-190zM20 60h200v5h-200zM15 65h210v5h-210zM15 70h210v5h-210zM20 75h200v5h-200zM25 80h190v5h-190zM35 85h170v5h-170zM40 90h160v5h-160zM50 95h140v5h-140zM60 100h120v5h-120zM75 105h90v5h-90zM95 110h50v5h-50z"/></clipPath></defs>
+                        <path fill="#1a0000" d="M95 25h50v5h-50zM75 30h90v5h-90zM65 35h110v5h-110zM55 40h130v5h-130zM45 45h150v5h-150zM35 50h170v5h-170zM30 55h180v5h-180zM25 60h190v5h-190zM20 65h200v5h-200zM15 70h210v5h-210zM20 75h200v5h-200zM25 80h190v5h-190zM35 85h170v5h-170zM40 90h160v5h-160zM50 95h140v5h-140zM60 100h120v5h-120zM75 105h90v5h-90zM95 110h50v5h-50z"/>
+                        <path fill="#3a0000" d="M95 20h50v5h-50zM75 25h20v5h-20zM145 25h20v5h-20zM65 30h10v5h-10zM165 30h10v5h-10zM55 35h10v5h-10zM175 35h10v5h-10zM45 40h10v5h-10zM185 40h10v5h-10zM35 45h10v5h-10zM195 45h10v5h-10zM30 50h5v5h-5zM205 50h5v5h-5zM25 55h5v5h-5zM210 55h5v5h-5zM20 60h5v5h-5zM215 60h5v5h-5zM15 65h5v5h-5zM220 65h5v5h-5z"/>
+                        <path fill="currentColor" d="M85 10h70v5h-70zM65 15h110v5h-110zM55 20h40v5h-40zM145 20h40v5h-40zM45 25h30v5h-30zM165 25h30v5h-30zM35 30h30v5h-30zM175 30h30v5h-30zM25 35h30v5h-30zM185 35h30v5h-30zM20 40h25v5h-25zM195 40h25v5h-25zM15 45h20v5h-20zM205 45h20v5h-20zM10 50h20v5h-20zM210 50h20v5h-20zM5 55h20v5h-20zM215 55h20v5h-20zM5 60h15v5h-15zM220 60h15v5h-15zM5 65h10v5h-10zM225 65h10v5h-10zM5 70h10v5h-10zM225 70h10v5h-10zM5 75h15v5h-15zM220 75h15v5h-15zM5 80h20v5h-20zM215 80h20v5h-20zM10 85h25v5h-25zM205 85h25v5h-25zM15 90h25v5h-25zM200 90h25v5h-25zM25 95h25v5h-25zM190 95h25v5h-25zM30 100h30v5h-30zM180 100h30v5h-30zM40 105h35v5h-35zM165 105h35v5h-35zM50 110h45v5h-45zM145 110h45v5h-45zM65 115h110v5h-110zM85 120h70v5h-70z"/>
+                        <path fill="#ff7070" d="M5 65h5v5h-5zM230 65h5v5h-5zM5 70h5v5h-5zM230 70h5v5h-5z"/>
+                        <g clip-path="url(#eye-opening)"><g id="pupil">
+                        <path fill="#060000" d="M105 30h30v5h-30zM95 35h10v5h-10zM135 35h10v5h-10zM90 40h10v5h-10zM140 40h10v5h-10zM85 45h10v5h-10zM145 45h10v5h-10zM85 50h5v5h-5zM150 50h5v5h-5zM80 55h5v5h-5zM155 55h5v5h-5zM80 60h5v5h-5zM155 60h5v5h-5zM80 65h5v5h-5zM155 65h5v5h-5zM80 70h5v5h-5zM155 70h5v5h-5zM80 75h5v5h-5zM155 75h5v5h-5zM80 80h5v5h-5zM155 80h5v5h-5zM85 85h5v5h-5zM150 85h5v5h-5zM85 90h10v5h-10zM145 90h10v5h-10zM90 95h10v5h-10zM140 95h10v5h-10zM95 100h10v5h-10zM135 100h10v5h-10zM105 105h30v5h-30z"/>
+                        <path fill="currentColor" d="M105 35h30v5h-30zM100 40h40v5h-40zM95 45h15v5h-15zM130 45h15v5h-15zM90 50h10v5h-10zM140 50h10v5h-10zM85 55h15v5h-15zM140 55h15v5h-15zM85 60h10v5h-10zM145 60h10v5h-10zM85 65h10v5h-10zM145 65h10v5h-10zM85 70h10v5h-10zM145 70h10v5h-10zM85 75h10v5h-10zM145 75h10v5h-10zM85 80h15v5h-15zM140 80h15v5h-15zM90 85h10v5h-10zM140 85h10v5h-10zM95 90h15v5h-15zM130 90h15v5h-15zM100 95h40v5h-40zM105 100h30v5h-30z"/>
+                        <path fill="#ff7070" d="M115 35h10v5h-10zM85 65h5v5h-5zM150 65h5v5h-5zM85 70h5v5h-5zM150 70h5v5h-5zM115 100h10v5h-10z"/>
+                        <path fill="#7a0000" d="M115 45h5v5h-5zM125 45h5v5h-5zM100 50h5v5h-5zM110 50h5v5h-5zM120 50h5v5h-5zM130 50h5v5h-5zM105 55h5v5h-5zM135 55h5v5h-5zM100 60h5v5h-5zM140 60h5v5h-5zM95 65h5v5h-5zM135 65h5v5h-5zM100 70h5v5h-5zM140 70h5v5h-5zM95 75h5v5h-5zM135 75h5v5h-5zM100 80h5v5h-5zM130 80h5v5h-5zM105 85h5v5h-5zM115 85h5v5h-5zM125 85h5v5h-5zM135 85h5v5h-5zM110 90h5v5h-5zM120 90h5v5h-5z"/>
+                        <path fill="#3a0000" d="M110 45h5v5h-5zM120 45h5v5h-5zM105 50h5v5h-5zM115 50h5v5h-5zM125 50h5v5h-5zM135 50h5v5h-5zM100 55h5v5h-5zM130 55h5v5h-5zM95 60h5v5h-5zM135 60h5v5h-5zM100 65h5v5h-5zM140 65h5v5h-5zM95 70h5v5h-5zM135 70h5v5h-5zM100 75h5v5h-5zM140 75h5v5h-5zM105 80h5v5h-5zM135 80h5v5h-5zM100 85h5v5h-5zM110 85h5v5h-5zM120 85h5v5h-5zM130 85h5v5h-5zM115 90h5v5h-5zM125 90h5v5h-5z"/>
+                        <path fill="#060000" d="M110 55h20v5h-20zM105 60h30v5h-30zM105 65h30v5h-30zM105 70h30v5h-30zM105 75h30v5h-30zM110 80h20v5h-20z"/>
+                        <polygon id="pupil-core" fill="#060000" points="133.79,75.71 125.71,83.79 114.29,83.79 106.21,75.71 106.21,64.29 114.29,56.21 125.71,56.21 133.79,64.29"/>
+                        <path fill="#ffffff" d="M110 60h5v5h-5z"/>
+                        <path fill="#ff7070" d="M105 55h5v5h-5z"/>
+                        </g></g>
+                        </svg>
                 </div>
                 <div class="subtitle">
                     <span>&gt; </span><span id="typed-text"></span><span class="blinking-cursor" aria-hidden="true">_</span>

@@ -27,8 +27,8 @@
   --kb-h: 0px;          /* measured on-screen keyboard height (JS) */
   --ticker-h: 1.85rem;
   --eye-color: #ff2a2a;
-  --eye-glow-a: 10px;
-  --eye-glow-b: 25px;
+  --eye-glow-a: 7px;   /* tight bloom keeps the sprite's cells legible */
+  --eye-glow-b: 20px;
   --eye-pulse: 5s;
   color-scheme: dark;
 }
