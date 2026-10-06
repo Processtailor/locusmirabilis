@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test": "npm run lint && npm run test:unit && npm run test:e2e",
     "build": "node scripts/build.js",
-    "images": "node scripts/make-images.js"
+    "images": "node scripts/make-images.js",
+    "preview": "npm run build && node scripts/publish-herenow.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

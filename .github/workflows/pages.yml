@@ -58,7 +58,10 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.event_name != 'pull_request'
+    # The github-pages environment only accepts deployments from branches its
+    # protection rules allow (by default: main). Manual runs let an allowed
+    # branch be deployed on demand once such a rule exists.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     needs: build
     environment:
