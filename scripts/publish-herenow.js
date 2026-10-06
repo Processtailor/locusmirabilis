@@ -8,6 +8,9 @@
  *   HERENOW_API_KEY=... node scripts/publish-herenow.js [--slug locus-mirabilis]
  *     account-owned, permanent, updatable under the same slug
  *
+ *   node scripts/publish-herenow.js --dir some/folder
+ *     publish another static folder (must contain index.html)
+ *
  * Flow (https://here.now/docs): POST a file manifest → PUT each file to its
  * presigned URL → POST finalize. The site URL is printed last.
  */
@@ -17,7 +20,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const DIST = path.join(ROOT, 'dist');
+const argv = process.argv.slice(2);
+const DIST = argv.includes('--dir') ? path.resolve(argv[argv.indexOf('--dir') + 1]) : path.join(ROOT, 'dist');
 const API = 'https://here.now/api/v1';
 const CLIENT = 'locus-mirabilis/scripts/publish-herenow.js';
 const API_KEY = process.env.HERENOW_API_KEY || '';
@@ -72,10 +76,9 @@ async function putFile(url, file) {
 }
 
 async function main() {
-  const args = process.argv.slice(2);
-  const slugArg = args.includes('--slug') ? args[args.indexOf('--slug') + 1] : '';
+  const slugArg = argv.includes('--slug') ? argv[argv.indexOf('--slug') + 1] : '';
   if (!fs.existsSync(path.join(DIST, 'index.html'))) {
-    throw new Error('dist/index.html not found — run `npm run build` first');
+    throw new Error(`${path.relative(ROOT, DIST) || 'dist'}/index.html not found — run \`npm run build\` first (or pass --dir <folder>)`);
   }
   const files = walk(DIST);
   const total = files.reduce((n, f) => n + f.size, 0);
